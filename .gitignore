@@ -1,5 +1,6 @@
 # 환경 변수 파일
 .env
+.runtimeconfig.json
 
 # Node.js 의존성
 node_modules/
@@ -24,3 +25,15 @@ Thumbs.db
 # 빌드 결과물
 dist/
 build/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc.local
+
+# Firebase Functions
+functions/node_modules/
+functions/.runtimeconfig.json
+functions/firebase-debug.log

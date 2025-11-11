@@ -19,23 +19,79 @@
 ## 기술 스택
 
 - **프론트엔드**: HTML5, CSS3, JavaScript (Vanilla)
-- **백엔드**: Node.js, Express
+- **백엔드**: Firebase Functions (서버리스) 또는 Node.js/Express (로컬)
+- **호스팅**: Firebase Hosting (추천) 또는 로컬 서버
 - **메일 발송**: Nodemailer
 
-## 설치 방법
+## 배포 방법
 
-### 1. 사전 요구사항
+**중요**: 개인 휴대전화에서 접속하려면 Firebase로 배포해야 합니다! (localhost는 모바일에서 접속 불가)
+
+### 방법 1: Firebase 배포 (추천 - 모바일 접속 가능)
+
+Firebase로 배포하면 언제 어디서나 (PC, 모바일, 태블릿) 접속 가능합니다!
+
+**자세한 Firebase 배포 가이드는 [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) 파일을 참고하세요.**
+
+#### 간단 요약:
+
+1. **Firebase CLI 설치**:
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   ```
+
+2. **Firebase 프로젝트 생성**:
+   - [Firebase Console](https://console.firebase.google.com/)에서 프로젝트 생성
+   - Blaze 플랜으로 업그레이드 (무료 할당량 충분)
+
+3. **프로젝트 연결**:
+   ```bash
+   firebase use --add
+   ```
+   생성한 프로젝트 선택
+
+4. **환경 변수 설정**:
+   ```bash
+   firebase functions:config:set email.service="gmail"
+   firebase functions:config:set email.user="your-email@gmail.com"
+   firebase functions:config:set email.password="your-app-password"
+   firebase functions:config:set email.to="company-all@company.com"
+   ```
+
+5. **Functions 의존성 설치**:
+   ```bash
+   cd functions
+   npm install
+   cd ..
+   ```
+
+6. **배포**:
+   ```bash
+   firebase deploy
+   ```
+
+7. **완료**!
+   - 배포 완료 후 표시되는 URL로 접속
+   - 예: `https://your-project-id.web.app`
+   - 이 URL을 통해 어디서든 접속 가능! 📱💻
+
+---
+
+### 방법 2: 로컬 서버 (개발용 - PC에서만 접속 가능)
+
+#### 1. 사전 요구사항
 - Node.js (v14 이상)
 - npm 또는 yarn
 
-### 2. 프로젝트 클론 및 설치
+#### 2. 프로젝트 클론 및 설치
 
 ```bash
 # 의존성 설치
 npm install
 ```
 
-### 3. 환경 변수 설정
+#### 3. 환경 변수 설정
 
 `.env.example` 파일을 복사하여 `.env` 파일을 생성합니다:
 
@@ -79,7 +135,7 @@ EMAIL_USER=your-email@outlook.com
 EMAIL_PASSWORD=your-password
 ```
 
-### 4. 서버 실행
+#### 4. 서버 실행
 
 ```bash
 # 프로덕션 모드
@@ -95,10 +151,15 @@ npm run dev
 http://localhost:3000 에서 접속 가능합니다.
 ```
 
+**주의**: 로컬 서버는 같은 네트워크의 PC에서만 접속 가능하며, 개인 휴대전화에서는 접속할 수 없습니다.
+
+---
+
 ## 사용 방법
 
 ### 1. 웹 페이지 접속
-브라우저에서 `http://localhost:3000` 로 접속합니다.
+- **Firebase 배포한 경우**: `https://your-project-id.web.app` 접속
+- **로컬 서버인 경우**: `http://localhost:3000` 접속
 
 ### 2. 휴가 신고
 1. "휴가 신고" 탭 선택
@@ -126,15 +187,22 @@ http://localhost:3000 에서 접속 가능합니다.
 
 ```
 leave-attendance-system/
-├── public/
-│   ├── index.html      # 메인 HTML 페이지
-│   ├── style.css       # 스타일시트
-│   └── script.js       # 클라이언트 JavaScript
-├── server.js           # Express 서버 및 메일 발송 로직
-├── package.json        # 프로젝트 의존성
-├── .env.example        # 환경 변수 예시
-├── .gitignore          # Git 무시 파일
-└── README.md           # 프로젝트 문서
+├── public/                 # 프론트엔드 파일
+│   ├── index.html          # 메인 HTML 페이지
+│   ├── style.css           # 스타일시트
+│   └── script.js           # 클라이언트 JavaScript
+├── functions/              # Firebase Functions (서버리스 백엔드)
+│   ├── index.js            # Functions 메인 파일
+│   ├── package.json        # Functions 의존성
+│   └── .env.example        # 환경 변수 예시
+├── server.js               # Express 서버 (로컬 개발용)
+├── firebase.json           # Firebase 설정
+├── .firebaserc             # Firebase 프로젝트 연결
+├── package.json            # 프로젝트 의존성
+├── .env.example            # 환경 변수 예시 (로컬용)
+├── .gitignore              # Git 무시 파일
+├── README.md               # 프로젝트 문서
+└── FIREBASE_SETUP.md       # Firebase 배포 가이드
 ```
 
 ## API 엔드포인트
@@ -206,7 +274,8 @@ EMAIL_TO=hr@company.com,admin@company.com,team@company.com
 ```
 
 ### 이메일 템플릿 수정
-`server.js` 파일의 `emailBody` 변수를 수정하여 이메일 템플릿을 커스터마이징할 수 있습니다.
+- **Firebase 배포**: `functions/index.js` 파일의 `emailBody` 변수 수정
+- **로컬 서버**: `server.js` 파일의 `emailBody` 변수 수정
 
 ### 스타일 변경
 `public/style.css` 파일을 수정하여 웹 페이지 디자인을 변경할 수 있습니다.
