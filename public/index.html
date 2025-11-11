@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴가 및 근태 신고 시스템</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>휴가 및 근태 신고 시스템</h1>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('leave')">휴가 신고</button>
+            <button class="tab-button" onclick="showTab('attendance')">근태 신고</button>
+        </div>
+
+        <!-- 휴가 신고 폼 -->
+        <div id="leave-form" class="form-container active">
+            <h2>휴가 신고</h2>
+            <form id="leaveForm">
+                <div class="form-group">
+                    <label for="leave-reporter">신고자 <span class="required">*</span></label>
+                    <input type="text" id="leave-reporter" name="reporter" required placeholder="이름을 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label for="leave-type">휴가일수 <span class="required">*</span></label>
+                    <select id="leave-type" name="leaveType" required onchange="handleLeaveTypeChange()">
+                        <option value="">선택하세요</option>
+                        <option value="전일휴가">전일휴가</option>
+                        <option value="반차휴가">반차휴가</option>
+                        <option value="반반차휴가">반반차휴가</option>
+                        <option value="경조휴가">경조휴가</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="leave-date">일자 <span class="required">*</span></label>
+                    <input type="date" id="leave-date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="leave-time">시간 <span class="required">*</span></label>
+                    <input type="time" id="leave-time" name="time" required>
+                </div>
+
+                <div class="form-group" id="special-leave-group" style="display: none;">
+                    <label for="special-leave-type">경조휴가 종류 <span class="required">*</span></label>
+                    <select id="special-leave-type" name="specialLeaveType">
+                        <option value="">선택하세요</option>
+                        <option value="결혼">결혼</option>
+                        <option value="사망(배우자)">사망(배우자)</option>
+                        <option value="사망(부모)">사망(부모)</option>
+                        <option value="사망(자녀)">사망(자녀)</option>
+                        <option value="사망(조부모)">사망(조부모)</option>
+                        <option value="사망(형제자매)">사망(형제자매)</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">신고하기</button>
+                    <button type="reset" class="reset-btn">초기화</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 근태 신고 폼 -->
+        <div id="attendance-form" class="form-container">
+            <h2>근태 신고</h2>
+            <form id="attendanceForm">
+                <div class="form-group">
+                    <label for="attendance-reporter">신고자 <span class="required">*</span></label>
+                    <input type="text" id="attendance-reporter" name="reporter" required placeholder="이름을 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label for="attendance-type">근태내용 <span class="required">*</span></label>
+                    <select id="attendance-type" name="attendanceType" required>
+                        <option value="">선택하세요</option>
+                        <option value="출근지연">출근지연</option>
+                        <option value="외출">외출</option>
+                        <option value="조기퇴근">조기퇴근</option>
+                        <option value="당직">당직</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendance-date">일자 <span class="required">*</span></label>
+                    <input type="date" id="attendance-date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendance-time">시간 <span class="required">*</span></label>
+                    <input type="time" id="attendance-time" name="time" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendance-reason">사유 <span class="required">*</span></label>
+                    <textarea id="attendance-reason" name="reason" required placeholder="사유를 입력하세요" rows="4"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">신고하기</button>
+                    <button type="reset" class="reset-btn">초기화</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
