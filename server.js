@@ -302,6 +302,47 @@ app.post('/api/attendance', async (req, res) => {
     }
 });
 
+// 헬스체크 엔드포인트
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// SMTP 상태 확인 엔드포인트
+app.get('/api/smtp-status', async (req, res) => {
+    try {
+        await transporter.verify();
+        res.status(200).json({
+            status: 'connected',
+            message: 'SMTP 서버 연결 성공',
+            config: {
+                host: 'smtp.office365.com',
+                port: 587,
+                user: process.env.EMAIL_USER ? '설정됨' : '미설정',
+                pass: process.env.EMAIL_PASS ? '설정됨' : '미설정'
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'SMTP 연결 실패',
+            error: {
+                message: error.message,
+                code: error.code
+            },
+            config: {
+                host: 'smtp.office365.com',
+                port: 587,
+                user: process.env.EMAIL_USER ? '설정됨' : '미설정',
+                pass: process.env.EMAIL_PASS ? '설정됨' : '미설정'
+            }
+        });
+    }
+});
+
 // 메인 페이지 라우트 (로그인 페이지로 리다이렉트)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
