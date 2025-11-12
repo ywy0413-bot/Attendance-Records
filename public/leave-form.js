@@ -113,9 +113,16 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
 
     const leaveDaysNum = parseFloat(leaveData.leaveDays);
 
-    // 2. 1.0일 미만인 경우 시작일과 종료일이 같아야 함
-    if (leaveDaysNum < 1.0 && leaveData.startDate !== leaveData.endDate) {
-        alert('1.0일 미만의 휴가는 시작일과 종료일이 같아야합니다');
+    // 2. 휴가일수에 따른 날짜 검증
+    // 1일 초과인 경우 종료일은 시작일 이후여야 함
+    if (leaveDaysNum > 1.0 && leaveData.startDate === leaveData.endDate) {
+        alert('휴가일수가 1일을 초과하는 경우 종료일은 시작일 이후여야 합니다');
+        return;
+    }
+
+    // 1일 이하인 경우 시작일과 종료일이 같아야 함
+    if (leaveDaysNum <= 1.0 && leaveData.startDate !== leaveData.endDate) {
+        alert('1.0일 이하의 휴가는 시작일과 종료일이 같아야합니다');
         return;
     }
 
