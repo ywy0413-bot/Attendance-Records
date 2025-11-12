@@ -77,6 +77,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
     // 시간차 계산
     let timeDuration = '';
+    let durationText = '';
     if (attendanceData.startTime && attendanceData.endTime) {
         const [startH, startM] = attendanceData.startTime.split(':').map(Number);
         const [endH, endM] = attendanceData.endTime.split(':').map(Number);
@@ -85,7 +86,18 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         const diffMinutes = endMinutes - startMinutes;
         const hours = Math.floor(diffMinutes / 60);
         const minutes = diffMinutes % 60;
-        timeDuration = `(${hours}시간 ${minutes}분)`;
+
+        // 1시간 미만이면 분만 표시
+        if (hours === 0) {
+            timeDuration = `(${minutes}분)`;
+            durationText = `${minutes}분`;
+        } else if (minutes === 0) {
+            timeDuration = `(${hours}시간)`;
+            durationText = `${hours}시간`;
+        } else {
+            timeDuration = `(${hours}시간 ${minutes}분)`;
+            durationText = `${hours}시간 ${minutes}분`;
+        }
     }
 
     const timeDisplay = attendanceData.endTime
@@ -93,7 +105,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         : attendanceData.startTime;
 
     // 이메일 제목
-    const emailSubject = `[근태신고] ${attendanceData.reporterEnglishName}(${attendanceData.date}, ${attendanceData.attendanceType})`;
+    const emailSubject = `[근태신고] ${attendanceData.reporterEnglishName}(${attendanceData.date}, ${attendanceData.attendanceType}, ${durationText})`;
 
     // 확인 팝업 표시
     const confirmMessage = `${emailSubject}
