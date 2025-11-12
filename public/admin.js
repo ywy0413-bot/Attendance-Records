@@ -327,6 +327,7 @@ async function uploadCSV() {
                 const name = cells[1]?.trim() || '';
                 const englishName = cells[2]?.trim() || '';
                 const department = cells[3]?.trim() || '';
+                const pinInput = cells[4]?.trim() || '';
 
                 if (!email || !email.includes('@')) {
                     throw new Error(`${i + 1}번째 줄: 이메일이 올바르지 않습니다.`);
@@ -340,8 +341,14 @@ async function uploadCSV() {
                     throw new Error(`${i + 1}번째 줄: 영어이름이 비어있습니다.`);
                 }
 
-                // 기본 PIN 생성 (0000)
-                const pin = '0000';
+                // PIN 처리 (E열에 값이 있으면 사용, 없으면 기본값 0000)
+                let pin = '0000';
+                if (pinInput) {
+                    if (!/^\d{4}$/.test(pinInput)) {
+                        throw new Error(`${i + 1}번째 줄: PIN은 4자리 숫자여야 합니다.`);
+                    }
+                    pin = pinInput;
+                }
 
                 // Firestore에 사용자 추가
                 await usersCollection.doc(email).set({
@@ -374,7 +381,7 @@ async function uploadCSV() {
                 }
             }
         }
-        resultMessage += '\n\n※ 모든 사용자의 초기 PIN은 0000입니다.';
+        resultMessage += '\n\n※ PIN을 입력하지 않은 사용자는 기본 PIN 0000으로 설정되었습니다.';
 
         messageDiv.className = failCount === 0 ? 'message success' : 'message warning';
         messageDiv.textContent = resultMessage;
