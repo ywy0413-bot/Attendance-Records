@@ -267,3 +267,155 @@ async function editUser(userId) {
 document.getElementById('newUserPin').addEventListener('input', function(e) {
     this.value = this.value.replace(/[^\d]/g, '');
 });
+
+// CSV 파일 업로드 및 일괄 등록
+async function uploadCSV() {
+    const fileInput = document.getElementById('csvFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('CSV 파일을 선택해주세요.');
+        return;
+    }
+
+    if (!file.name.endsWith('.csv')) {
+        alert('CSV 파일만 업로드 가능합니다.');
+        return;
+    }
+
+    const messageDiv = document.getElementById('message');
+    messageDiv.className = 'message';
+    messageDiv.textContent = 'CSV 파일 처리 중...';
+    messageDiv.style.display = 'block';
+
+    try {
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+
+        if (lines.length === 0) {
+            throw new Error('CSV 파일이 비어있습니다.');
+        }
+
+        // 첫 번째 줄이 헤더인지 확인 (이메일 형식이 아니면 헤더로 간주)
+        const firstLine = lines[0];
+        const firstCells = parseCSVLine(firstLine);
+        const isHeader = !firstCells[0].includes('@');
+
+        const startIndex = isHeader ? 1 : 0;
+        const dataLines = lines.slice(startIndex);
+
+        if (dataLines.length === 0) {
+            throw new Error('등록할 사용자 데이터가 없습니다.');
+        }
+
+        messageDiv.textContent = `${dataLines.length}명의 사용자 등록 중...`;
+
+        let successCount = 0;
+        let failCount = 0;
+        const errors = [];
+
+        // 각 라인을 처리
+        for (let i = 0; i < dataLines.length; i++) {
+            const line = dataLines[i].trim();
+            if (!line) continue;
+
+            try {
+                const cells = parseCSVLine(line);
+
+                // 데이터 검증
+                const email = cells[0]?.trim() || '';
+                const name = cells[1]?.trim() || '';
+                const englishName = cells[2]?.trim() || '';
+                const department = cells[3]?.trim() || '';
+
+                if (!email || !email.includes('@')) {
+                    throw new Error(`${i + 1}번째 줄: 이메일이 올바르지 않습니다.`);
+                }
+
+                if (!name) {
+                    throw new Error(`${i + 1}번째 줄: 이름이 비어있습니다.`);
+                }
+
+                if (!englishName) {
+                    throw new Error(`${i + 1}번째 줄: 영어이름이 비어있습니다.`);
+                }
+
+                // 기본 PIN 생성 (0000)
+                const pin = '0000';
+
+                // Firestore에 사용자 추가
+                await usersCollection.doc(email).set({
+                    email: email,
+                    name: name,
+                    englishName: englishName,
+                    pin: pin,
+                    department: department,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.email,
+                    bulkUploaded: true
+                });
+
+                successCount++;
+            } catch (error) {
+                failCount++;
+                errors.push(error.message);
+                console.error(`${i + 1}번째 줄 처리 오류:`, error);
+            }
+        }
+
+        // 결과 메시지
+        let resultMessage = `등록 완료: ${successCount}명 성공`;
+        if (failCount > 0) {
+            resultMessage += `, ${failCount}명 실패`;
+            if (errors.length > 0) {
+                resultMessage += `\n\n실패 내역:\n${errors.slice(0, 5).join('\n')}`;
+                if (errors.length > 5) {
+                    resultMessage += `\n... 외 ${errors.length - 5}건`;
+                }
+            }
+        }
+        resultMessage += '\n\n※ 모든 사용자의 초기 PIN은 0000입니다.';
+
+        messageDiv.className = failCount === 0 ? 'message success' : 'message warning';
+        messageDiv.textContent = resultMessage;
+
+        // 파일 입력 초기화
+        fileInput.value = '';
+
+        // 사용자 목록 새로고침
+        await loadUsers();
+
+        // 5초 후 메시지 숨김
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+
+    } catch (error) {
+        console.error('CSV 업로드 오류:', error);
+        messageDiv.className = 'message error';
+        messageDiv.textContent = '오류가 발생했습니다: ' + error.message;
+    }
+}
+
+// CSV 라인 파싱 (쉼표로 구분, 따옴표 처리)
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+
+    result.push(current);
+    return result.map(cell => cell.replace(/^"|"$/g, '').trim());
+}
