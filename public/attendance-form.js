@@ -104,8 +104,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         const endMinutes = endH * 60 + endM;
         diffMinutes = endMinutes - startMinutes;
 
-        // 120분 초과 검증
-        if (diffMinutes > 120) {
+        // 120분 초과 검증 (전일 야근은 예외)
+        if (diffMinutes > 120 && attendanceData.attendanceType !== '전일 야근') {
             const messageDiv = document.getElementById('message');
             messageDiv.className = 'message error';
             messageDiv.textContent = '근태 신고는 120분 이하로만 사용 가능합니다.';
