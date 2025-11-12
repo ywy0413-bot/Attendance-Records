@@ -1,22 +1,62 @@
 // Firebase 버전의 로그인 로직
-// 페이지 로드 시 자동 로그인 체크
-window.addEventListener('DOMContentLoaded', () => {
+// 페이지 로드 시 자동 로그인 체크 및 사용자 목록 로드
+window.addEventListener('DOMContentLoaded', async () => {
     const savedUser = localStorage.getItem('userData');
     if (savedUser) {
         const userData = JSON.parse(savedUser);
         if (userData.rememberMe) {
             // 자동 로그인 - 메인 페이지로 이동
             window.location.href = 'main.html';
+            return;
         }
     }
+
+    // 사용자 목록 로드
+    await loadUserList();
 });
+
+// 사용자 목록을 Firestore에서 가져와 드롭다운에 채우기
+async function loadUserList() {
+    try {
+        const snapshot = await usersCollection.get();
+        const users = [];
+
+        snapshot.forEach(doc => {
+            const userData = doc.data();
+            users.push({
+                email: doc.id,
+                name: userData.name,
+                englishName: userData.englishName
+            });
+        });
+
+        // 이름을 가나다 순으로 정렬
+        users.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+        // 드롭다운에 옵션 추가
+        const userSelect = document.getElementById('userName');
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.email;
+            option.textContent = user.name;
+            userSelect.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('사용자 목록 로드 오류:', error);
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = 'message error';
+        messageDiv.textContent = '사용자 목록을 불러오는데 실패했습니다.';
+        messageDiv.style.display = 'block';
+    }
+}
 
 // 로그인 폼 제출
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const messageDiv = document.getElementById('message');
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('userName').value; // 선택된 사용자의 이메일
     const pin = document.getElementById('pin').value;
     const rememberMe = document.getElementById('rememberMe').checked;
 
