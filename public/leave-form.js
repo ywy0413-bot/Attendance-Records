@@ -111,27 +111,36 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         return;
     }
 
-    // 2. 휴가일수에 따른 최소 소요시간 검증
-    const [startH, startM] = leaveData.startTime.split(':').map(Number);
-    const [endH, endM] = leaveData.endTime.split(':').map(Number);
-    const durationMinutes = (endH * 60 + endM) - (startH * 60 + startM);
-
     const leaveDaysNum = parseFloat(leaveData.leaveDays);
-    let requiredMinutes = 0;
 
-    if (leaveDaysNum === 0.25) {
-        requiredMinutes = 120; // 2시간
-    } else if (leaveDaysNum === 0.5) {
-        requiredMinutes = 240; // 4시간
-    } else if (leaveDaysNum === 0.75) {
-        requiredMinutes = 360; // 6시간
-    } else if (leaveDaysNum >= 1.0) {
-        requiredMinutes = 480; // 8시간
+    // 2. 1.0일 미만인 경우 시작일과 종료일이 같아야 함
+    if (leaveDaysNum < 1.0 && leaveData.startDate !== leaveData.endDate) {
+        alert('1.0일 미만의 휴가는 시작일과 종료일이 같아야합니다');
+        return;
     }
 
-    if (requiredMinutes > 0 && durationMinutes < requiredMinutes) {
-        alert('휴가 일수보다 소요시간(종료시간-시작시간)이 짧습니다');
-        return;
+    // 3. 휴가일수에 따른 최소 소요시간 검증 (1.0일 초과는 제외)
+    if (leaveDaysNum <= 1.0) {
+        const [startH, startM] = leaveData.startTime.split(':').map(Number);
+        const [endH, endM] = leaveData.endTime.split(':').map(Number);
+        const durationMinutes = (endH * 60 + endM) - (startH * 60 + startM);
+
+        let requiredMinutes = 0;
+
+        if (leaveDaysNum === 0.25) {
+            requiredMinutes = 120; // 2시간
+        } else if (leaveDaysNum === 0.5) {
+            requiredMinutes = 240; // 4시간
+        } else if (leaveDaysNum === 0.75) {
+            requiredMinutes = 360; // 6시간
+        } else if (leaveDaysNum === 1.0) {
+            requiredMinutes = 480; // 8시간
+        }
+
+        if (requiredMinutes > 0 && durationMinutes < requiredMinutes) {
+            alert('휴가 일수보다 소요시간(종료시간-시작시간)이 짧습니다');
+            return;
+        }
     }
 
     // 시간 표시 형식
