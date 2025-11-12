@@ -273,9 +273,9 @@ async function deleteAttendanceRecord(recordId) {
 // 휴가 차감
 async function deductVacation() {
     const vacationDays = parseFloat(document.getElementById('vacationDays').value);
-    const minutesToDeduct = vacationDays * 120; // 0.25일당 120분
+    const minutesToDeduct = vacationDays * 480; // 1일 = 480분, 0.25일 = 120분
 
-    // 누계 시간이 차감하려는 시간보다 적으면 에러
+    // 누계 시간이 120분 미만이면 차감 불가
     if (currentCumulativeMinutes < 120) {
         alert('휴가 차감은 0.25일(120분) 미만인 경우 불가능합니다.');
         return;
