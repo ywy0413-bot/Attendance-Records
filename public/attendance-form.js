@@ -1,3 +1,6 @@
+// 버전 확인 로그
+console.log('Attendance Form Version: 2024-11-12-v2');
+
 // 시간/분 옵션 생성
 function generateTimeOptions() {
     const startHourSelect = document.getElementById('startHour');
