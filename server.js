@@ -104,9 +104,6 @@ app.post('/api/leave', async (req, res) => {
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h2>휴가 신고서</h2>
-        </div>
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>
@@ -218,9 +215,6 @@ app.post('/api/attendance', async (req, res) => {
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h2>근태 신고서</h2>
-        </div>
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>

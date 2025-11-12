@@ -143,11 +143,27 @@ function displayStats(records) {
         return;
     }
 
-    // 근태 유형별 개수 집계
+    // 근태 유형별 개수 집계 및 누계 시간 계산
     const typeCount = {};
+    let totalMinutes = 0; // 당직과 전일야근 제외한 총 시간 (분)
+
     records.forEach(record => {
         const type = record.attendanceType || '기타';
         typeCount[type] = (typeCount[type] || 0) + 1;
+
+        // 당직과 전일 야근 제외하고 시간 계산
+        if (type !== '당직' && type !== '전일 야근' && record.startTime && record.endTime) {
+            try {
+                const [startH, startM] = record.startTime.split(':').map(Number);
+                const [endH, endM] = record.endTime.split(':').map(Number);
+                const diffMinutes = (endH * 60 + endM) - (startH * 60 + startM);
+                if (diffMinutes > 0) {
+                    totalMinutes += diffMinutes;
+                }
+            } catch (error) {
+                console.error('시간 계산 오류:', error);
+            }
+        }
     });
 
     // 테이블 내용 생성
@@ -181,19 +197,31 @@ function displayStats(records) {
     }).join('');
 
     // 요약 정보 업데이트
-    updateSummary(records.length, typeCount);
+    updateSummary(records.length, typeCount, totalMinutes);
 }
 
 // 요약 정보 업데이트
-function updateSummary(totalCount, typeCount) {
+function updateSummary(totalCount, typeCount, totalMinutes = 0) {
     document.getElementById('totalCount').textContent = `${totalCount}건`;
 
-    // 근태 유형별 요약 생성
-    const typeBreakdown = Object.entries(typeCount)
-        .map(([type, count]) => `${type}: ${count}건`)
+    // 5가지 근태 유형 모두 표시 (0건이어도)
+    const types = ['외출', '출근지연', '조기퇴근', '당직', '전일 야근'];
+    const typeBreakdown = types
+        .map(type => `${type} ${typeCount[type] || 0}건`)
         .join(', ');
 
-    document.getElementById('typeBreakdown').textContent = typeBreakdown || '-';
+    document.getElementById('typeBreakdown').textContent = typeBreakdown;
+
+    // 누계 시간 표시 (시간과 분으로 변환)
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const cumulativeTime = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+
+    // HTML에 누계 시간 엘리먼트가 있으면 업데이트
+    const cumulativeElement = document.getElementById('cumulativeTime');
+    if (cumulativeElement) {
+        cumulativeElement.textContent = cumulativeTime;
+    }
 }
 
 // 근태 기록 삭제

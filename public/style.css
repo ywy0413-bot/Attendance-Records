@@ -555,6 +555,12 @@ footer {
     margin: 0;
 }
 
+/* 근태 유형 텍스트는 작게 */
+#typeBreakdown {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
 .table-container {
     overflow-x: auto;
     border-radius: 8px;
