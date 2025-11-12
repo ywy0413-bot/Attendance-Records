@@ -92,29 +92,30 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // 시간차 계산
+    // 시간차 계산 (분 단위로 통일)
     let timeDuration = '';
     let durationText = '';
+    let diffMinutes = 0;
+
     if (attendanceData.startTime && attendanceData.endTime) {
         const [startH, startM] = attendanceData.startTime.split(':').map(Number);
         const [endH, endM] = attendanceData.endTime.split(':').map(Number);
         const startMinutes = startH * 60 + startM;
         const endMinutes = endH * 60 + endM;
-        const diffMinutes = endMinutes - startMinutes;
-        const hours = Math.floor(diffMinutes / 60);
-        const minutes = diffMinutes % 60;
+        diffMinutes = endMinutes - startMinutes;
 
-        // 1시간 미만이면 분만 표시
-        if (hours === 0) {
-            timeDuration = `(${minutes}분)`;
-            durationText = `${minutes}분`;
-        } else if (minutes === 0) {
-            timeDuration = `(${hours}시간)`;
-            durationText = `${hours}시간`;
-        } else {
-            timeDuration = `(${hours}시간 ${minutes}분)`;
-            durationText = `${hours}시간 ${minutes}분`;
+        // 120분 초과 검증
+        if (diffMinutes > 120) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message error';
+            messageDiv.textContent = '근태 신고는 120분 이하로만 사용 가능합니다.';
+            messageDiv.style.display = 'block';
+            return;
         }
+
+        // 분 단위로만 표시
+        timeDuration = `(${diffMinutes}분)`;
+        durationText = `${diffMinutes}분`;
     }
 
     const timeDisplay = attendanceData.endTime

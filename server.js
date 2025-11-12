@@ -197,21 +197,23 @@ app.post('/api/attendance', async (req, res) => {
             reason
         } = req.body;
 
-        // 시간 표시 계산
+        // 시간 표시 계산 (분 단위로 통일)
         let timeDisplay = startTime;
+        let durationText = '';
         if (endTime) {
             const [startH, startM] = startTime.split(':').map(Number);
             const [endH, endM] = endTime.split(':').map(Number);
             const startMinutes = startH * 60 + startM;
             const endMinutes = endH * 60 + endM;
             const diffMinutes = endMinutes - startMinutes;
-            const hours = Math.floor(diffMinutes / 60);
-            const minutes = diffMinutes % 60;
-            timeDisplay = `${startTime} ~ ${endTime} (${hours}시간 ${minutes}분)`;
+            timeDisplay = `${startTime} ~ ${endTime} (${diffMinutes}분)`;
+            durationText = `${diffMinutes}분`;
         }
 
-        // 이메일 제목 생성: [근태신고] EnglishName(Date, AttendanceType)
-        const emailSubject = `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType})`;
+        // 이메일 제목 생성: [근태신고] EnglishName(Date, AttendanceType, Duration)
+        const emailSubject = durationText
+            ? `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType}, ${durationText})`
+            : `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType})`;
         const emailBody = `
 <!DOCTYPE html>
 <html>
