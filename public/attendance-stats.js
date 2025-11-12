@@ -7,6 +7,7 @@ if (!currentUser) {
 
 let allAttendanceRecords = [];
 let availableYears = new Set();
+let currentCumulativeMinutes = 0; // 현재 누계 시간 (분)
 
 // 페이지 로드 시 근태 데이터 불러오기
 loadAttendanceStats();
@@ -215,6 +216,9 @@ function displayStats(records) {
 
 // 요약 정보 업데이트
 function updateSummary(totalCount, typeCount, totalMinutes = 0) {
+    // 전역 변수 업데이트
+    currentCumulativeMinutes = totalMinutes;
+
     // totalCount 요소가 있으면 업데이트 (제거되었을 수 있음)
     const totalCountElement = document.getElementById('totalCount');
     if (totalCountElement) {
@@ -270,6 +274,18 @@ async function deleteAttendanceRecord(recordId) {
 async function deductVacation() {
     const vacationDays = parseFloat(document.getElementById('vacationDays').value);
     const minutesToDeduct = vacationDays * 120; // 0.25일당 120분
+
+    // 누계 시간이 차감하려는 시간보다 적으면 에러
+    if (currentCumulativeMinutes < 120) {
+        alert('휴가 차감은 0.25일(120분) 미만인 경우 불가능합니다.');
+        return;
+    }
+
+    // 누계 시간이 차감하려는 시간보다 적으면 에러
+    if (currentCumulativeMinutes < minutesToDeduct) {
+        alert(`누계 시간이 부족합니다. 현재 누계: ${currentCumulativeMinutes}분, 차감 시도: ${minutesToDeduct}분`);
+        return;
+    }
 
     if (!confirm(`${vacationDays}일 (${minutesToDeduct}분)을 차감하시겠습니까?`)) {
         return;

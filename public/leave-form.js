@@ -149,18 +149,16 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
             // 이메일 발송 실패해도 신고는 완료된 것으로 처리
         }
 
-        messageDiv.className = 'message success';
-        messageDiv.textContent = '휴가 신고가 성공적으로 제출되었습니다.';
+        // 성공 팝업 표시
+        alert('메일이 성공적으로 발송되었습니다.');
 
         // 폼 초기화
         document.getElementById('leaveForm').reset();
         document.getElementById('customDaysGroup').style.display = 'none';
         generateTimeOptions(); // 시간 옵션 재생성
 
-        // 3초 후 메인 페이지로 이동
-        setTimeout(() => {
-            window.location.href = 'main.html';
-        }, 3000);
+        // 메인 페이지로 이동
+        window.location.href = 'main.html';
     } catch (error) {
         console.error('휴가 신고 오류:', error);
         messageDiv.className = 'message error';
