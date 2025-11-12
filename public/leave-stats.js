@@ -136,7 +136,7 @@ function displayStats(records) {
     if (records.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="empty-message">휴가 기록이 없습니다.</td>
+                <td colspan="8" class="empty-message">휴가 기록이 없습니다.</td>
             </tr>
         `;
         updateSummary(0, 0);
@@ -176,7 +176,6 @@ function displayStats(records) {
                 <td>${record.leaveDays || '-'}일</td>
                 <td>${record.startTime || '-'}</td>
                 <td>${record.endTime || '-'}</td>
-                <td>${record.reason || '-'}</td>
                 <td><button onclick="deleteLeaveRecord('${record.id}')" class="btn-delete">삭제</button></td>
             </tr>
         `;

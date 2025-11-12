@@ -17,7 +17,7 @@
             <form id="attendanceForm" class="form-container">
                 <div class="form-group">
                     <label for="reporter">신고자 *</label>
-                    <input type="text" id="reporter" name="reporter" required placeholder="로그인한 이메일" readonly style="background-color: #f0f0f0;">
+                    <input type="text" id="reporter" name="reporter" required placeholder="이름" readonly style="background-color: #f0f0f0;">
                 </div>
 
                 <div class="form-group">
@@ -39,16 +39,28 @@
 
                 <div class="form-group">
                     <label for="startTime">시작 시간 *</label>
-                    <select id="startTime" name="startTime" required class="time-select">
-                        <option value="">선택하세요</option>
-                    </select>
+                    <div class="time-input-group">
+                        <select id="startHour" name="startHour" required class="time-select-small">
+                            <option value="">시</option>
+                        </select>
+                        <span>:</span>
+                        <select id="startMinute" name="startMinute" required class="time-select-small">
+                            <option value="">분</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="endTime">종료 시간</label>
-                    <select id="endTime" name="endTime" class="time-select">
-                        <option value="">선택하세요</option>
-                    </select>
+                    <div class="time-input-group">
+                        <select id="endHour" name="endHour" class="time-select-small">
+                            <option value="">시</option>
+                        </select>
+                        <span>:</span>
+                        <select id="endMinute" name="endMinute" class="time-select-small">
+                            <option value="">분</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">

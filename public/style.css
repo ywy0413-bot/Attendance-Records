@@ -169,6 +169,32 @@ main {
     min-height: 100px;
 }
 
+.time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-input-group span {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.time-select-small {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.time-select-small:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
 .button-group {
     display: flex;
     gap: 10px;

@@ -202,6 +202,8 @@ app.post('/api/attendance', async (req, res) => {
     try {
         const {
             reporter,
+            reporterName,
+            reporterEnglishName,
             attendanceType,
             date,
             startTime,
@@ -209,8 +211,8 @@ app.post('/api/attendance', async (req, res) => {
             reason
         } = req.body;
 
-        // 이메일 내용 생성
-        const emailSubject = `[근태 신고] ${reporter} - ${attendanceType}`;
+        // 이메일 제목 생성: [근태신고] EnglishName(Date, AttendanceType)
+        const emailSubject = `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType})`;
         const emailBody = `
 <!DOCTYPE html>
 <html>
@@ -235,6 +237,10 @@ app.post('/api/attendance', async (req, res) => {
         <div class="content">
             <div class="info-row">
                 <span class="label">신고자:</span>
+                <span class="value">${reporterEnglishName} (${reporterName})</span>
+            </div>
+            <div class="info-row">
+                <span class="label">이메일:</span>
                 <span class="value">${reporter}</span>
             </div>
             <div class="info-row">

@@ -66,11 +66,6 @@ document.getElementById('leaveDays').addEventListener('change', function() {
 document.getElementById('leaveForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const messageDiv = document.getElementById('message');
-    messageDiv.className = 'message';
-    messageDiv.textContent = '제출 중...';
-    messageDiv.style.display = 'block';
-
     // 폼 데이터 수집
     const leaveDays = document.getElementById('leaveDays').value === '기타'
         ? document.getElementById('customDays').value
@@ -89,6 +84,29 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         reason: document.getElementById('reason').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+
+    // 확인 팝업 표시
+    const confirmMessage = `다음 내용으로 휴가 신고를 제출하시겠습니까?
+
+신고자: ${leaveData.reporterEnglishName}
+휴가 종류: ${leaveData.leaveType}
+휴가 일수: ${leaveData.leaveDays}일
+시작일: ${leaveData.startDate}
+종료일: ${leaveData.endDate}
+시작 시간: ${leaveData.startTime}
+종료 시간: ${leaveData.endTime}
+사유: ${leaveData.reason}
+
+이메일로 발송됩니다.`;
+
+    if (!confirm(confirmMessage)) {
+        return; // 취소하면 제출 중단
+    }
+
+    const messageDiv = document.getElementById('message');
+    messageDiv.className = 'message';
+    messageDiv.textContent = '제출 중...';
+    messageDiv.style.display = 'block';
 
     try {
         // Firestore에 저장
