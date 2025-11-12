@@ -99,6 +99,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         const endMinutes = endH * 60 + endM;
         diffMinutes = endMinutes - startMinutes;
 
+        // 종료시간이 시작시간보다 이전이거나 같은 경우 오류
+        if (diffMinutes <= 0) {
+            alert('종료시간은 시작시간 이후여야 합니다');
+            return;
+        }
+
         // 120분 초과 검증 (전일 야근은 예외)
         if (diffMinutes > 120 && attendanceData.attendanceType !== '전일 야근') {
             const messageDiv = document.getElementById('message');

@@ -102,6 +102,38 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
+    // 1. 종료일이 시작일보다 이전인지 확인
+    const startDateObj = new Date(leaveData.startDate);
+    const endDateObj = new Date(leaveData.endDate);
+
+    if (endDateObj < startDateObj) {
+        alert('오류 : 종료일이 시작일 이전입니다');
+        return;
+    }
+
+    // 2. 휴가일수에 따른 최소 소요시간 검증
+    const [startH, startM] = leaveData.startTime.split(':').map(Number);
+    const [endH, endM] = leaveData.endTime.split(':').map(Number);
+    const durationMinutes = (endH * 60 + endM) - (startH * 60 + startM);
+
+    const leaveDaysNum = parseFloat(leaveData.leaveDays);
+    let requiredMinutes = 0;
+
+    if (leaveDaysNum === 0.25) {
+        requiredMinutes = 120; // 2시간
+    } else if (leaveDaysNum === 0.5) {
+        requiredMinutes = 240; // 4시간
+    } else if (leaveDaysNum === 0.75) {
+        requiredMinutes = 360; // 6시간
+    } else if (leaveDaysNum >= 1.0) {
+        requiredMinutes = 480; // 8시간
+    }
+
+    if (requiredMinutes > 0 && durationMinutes < requiredMinutes) {
+        alert('휴가 일수보다 소요시간(종료시간-시작시간)이 짧습니다');
+        return;
+    }
+
     // 시간 표시 형식
     const timeDisplay = `${leaveData.startTime} ~ ${leaveData.endTime}`;
 
