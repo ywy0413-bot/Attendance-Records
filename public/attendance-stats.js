@@ -151,8 +151,12 @@ function displayStats(records) {
         const type = record.attendanceType || '기타';
         typeCount[type] = (typeCount[type] || 0) + 1;
 
+        // 휴가 차감인 경우
+        if (record.isDeduction && record.deductionMinutes) {
+            totalMinutes -= record.deductionMinutes;
+        }
         // 당직과 전일 야근 제외하고 시간 계산
-        if (type !== '당직' && type !== '전일 야근' && record.startTime && record.endTime) {
+        else if (type !== '당직' && type !== '전일 야근' && record.startTime && record.endTime) {
             try {
                 const [startH, startM] = record.startTime.split(':').map(Number);
                 const [endH, endM] = record.endTime.split(':').map(Number);
@@ -183,13 +187,22 @@ function displayStats(records) {
             }
         }
 
+        // 휴가 차감인 경우 시간 표시를 다르게
+        let startTimeDisplay = record.startTime || '-';
+        let endTimeDisplay = record.endTime || '-';
+
+        if (record.isDeduction && record.deductionMinutes) {
+            startTimeDisplay = '-';
+            endTimeDisplay = `-${record.deductionMinutes}분`;
+        }
+
         return `
             <tr>
                 <td>${createdDate}</td>
                 <td>${record.attendanceType || '-'}</td>
                 <td>${formatShortDate(record.date)}</td>
-                <td>${record.startTime || '-'}</td>
-                <td>${record.endTime || '-'}</td>
+                <td>${startTimeDisplay}</td>
+                <td>${endTimeDisplay}</td>
                 <td>${record.reason || '-'}</td>
                 <td><button onclick="deleteAttendanceRecord('${record.id}')" class="btn-delete">삭제</button></td>
             </tr>
@@ -242,5 +255,46 @@ async function deleteAttendanceRecord(recordId) {
     } catch (error) {
         console.error('근태 기록 삭제 오류:', error);
         alert('삭제 중 오류가 발생했습니다: ' + error.message);
+    }
+}
+
+// 휴가 차감
+async function deductVacation() {
+    const vacationDays = parseFloat(document.getElementById('vacationDays').value);
+    const minutesToDeduct = vacationDays * 120; // 0.25일당 120분
+
+    if (!confirm(`${vacationDays}일 (${minutesToDeduct}분)을 차감하시겠습니까?`)) {
+        return;
+    }
+
+    try {
+        // 휴가 차감 기록 생성
+        const deductionData = {
+            reporter: currentUser.email,
+            reporterName: currentUser.email,
+            reporterEnglishName: currentUser.email,
+            attendanceType: '휴가차감',
+            date: new Date().toISOString().split('T')[0],
+            startTime: '00:00',
+            endTime: `00:${String(minutesToDeduct).padStart(2, '0')}`,
+            reason: `휴가 ${vacationDays}일 차감`,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isDeduction: true, // 차감 기록 표시
+            deductionMinutes: minutesToDeduct // 차감 분수 저장
+        };
+
+        // Firestore에 저장
+        await attendanceRecordsCollection.add(deductionData);
+
+        console.log('휴가 차감이 기록되었습니다:', deductionData);
+
+        alert(`${vacationDays}일 (${minutesToDeduct}분)이 차감되었습니다.`);
+
+        // 데이터 다시 불러오기
+        await loadAttendanceStats();
+
+    } catch (error) {
+        console.error('휴가 차감 오류:', error);
+        alert('차감 중 오류가 발생했습니다: ' + error.message);
     }
 }

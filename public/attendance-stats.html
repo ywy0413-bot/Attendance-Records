@@ -27,17 +27,33 @@
                 </div>
 
                 <div class="summary-section">
-                    <div class="summary-card">
-                        <h3>총 근태 신고 건수</h3>
-                        <p id="totalCount" class="summary-value">0건</p>
+                    <div class="summary-card summary-card-wide">
+                        <h3>근태 유형</h3>
+                        <p id="typeBreakdown" class="summary-value">-</p>
                     </div>
                     <div class="summary-card">
                         <h3>누계 시간 (당직, 전일야근 제외)</h3>
                         <p id="cumulativeTime" class="summary-value">0분</p>
                     </div>
                     <div class="summary-card">
-                        <h3>근태 유형</h3>
-                        <p id="typeBreakdown" class="summary-value">-</p>
+                        <h3>휴가 차감</h3>
+                        <div class="vacation-deduction">
+                            <select id="vacationDays" class="vacation-select">
+                                <option value="0.25">0.25일</option>
+                                <option value="0.5">0.5일</option>
+                                <option value="0.75">0.75일</option>
+                                <option value="1.0">1.0일</option>
+                                <option value="1.25">1.25일</option>
+                                <option value="1.5">1.5일</option>
+                                <option value="1.75">1.75일</option>
+                                <option value="2.0">2.0일</option>
+                                <option value="2.25">2.25일</option>
+                                <option value="2.5">2.5일</option>
+                                <option value="2.75">2.75일</option>
+                                <option value="3.0">3.0일</option>
+                            </select>
+                            <button onclick="deductVacation()" class="btn-deduct">차감</button>
+                        </div>
                     </div>
                 </div>
 

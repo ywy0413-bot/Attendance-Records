@@ -21,7 +21,11 @@
       "Bash(firebase apps:sdkconfig:*)",
       "Bash(firebase init:*)",
       "Bash(npm install:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(timeout /t 45 /nobreak)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

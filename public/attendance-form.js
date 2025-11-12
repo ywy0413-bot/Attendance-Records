@@ -123,7 +123,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         : attendanceData.startTime;
 
     // 이메일 제목
-    const emailSubject = `[근태신고] ${attendanceData.reporterEnglishName}(${attendanceData.date}, ${attendanceData.attendanceType}, ${durationText})`;
+    const emailSubject = `[근태공유] ${attendanceData.reporterEnglishName}(${attendanceData.date}, ${attendanceData.attendanceType}, ${durationText})`;
 
     // 확인 팝업 표시
     const confirmMessage = `${emailSubject}

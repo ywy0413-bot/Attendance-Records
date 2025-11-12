@@ -193,10 +193,10 @@ app.post('/api/attendance', async (req, res) => {
             durationText = `${diffMinutes}분`;
         }
 
-        // 이메일 제목 생성: [근태신고] EnglishName(Date, AttendanceType, Duration)
+        // 이메일 제목 생성: [근태공유] EnglishName(Date, AttendanceType, Duration)
         const emailSubject = durationText
-            ? `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType}, ${durationText})`
-            : `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType})`;
+            ? `[근태공유] ${reporterEnglishName}(${date}, ${attendanceType}, ${durationText})`
+            : `[근태공유] ${reporterEnglishName}(${date}, ${attendanceType})`;
         const emailBody = `
 <!DOCTYPE html>
 <html>
