@@ -143,11 +143,14 @@ function displayStats(records) {
         return;
     }
 
-    // 총 휴가일수 계산
+    // 총 휴가일수 계산 (경조휴가 제외)
     let totalDays = 0;
     records.forEach(record => {
-        const days = parseFloat(record.leaveDays) || 0;
-        totalDays += days;
+        // 경조휴가는 카운팅에서 제외
+        if (record.leaveType !== '경조휴가') {
+            const days = parseFloat(record.leaveDays) || 0;
+            totalDays += days;
+        }
     });
 
     // 테이블 내용 생성

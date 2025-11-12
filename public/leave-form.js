@@ -1,32 +1,45 @@
-// 5분 단위 시간 옵션 생성 (08:00 ~ 18:00)
+// 시간/분 옵션 생성 (시간: 08~18, 분: 10분 단위)
 function generateTimeOptions() {
-    const startTimeSelect = document.getElementById('startTime');
-    const endTimeSelect = document.getElementById('endTime');
+    const startHourSelect = document.getElementById('startHour');
+    const startMinuteSelect = document.getElementById('startMinute');
+    const endHourSelect = document.getElementById('endHour');
+    const endMinuteSelect = document.getElementById('endMinute');
 
-    // 08:00부터 18:00까지만 생성
+    // 시간 옵션 생성 (08 ~ 18)
     for (let hour = 8; hour <= 18; hour++) {
-        // 18시일 때는 00분만 추가 (18:00까지만)
-        const maxMinute = (hour === 18) ? 0 : 55;
-        for (let minute = 0; minute <= maxMinute; minute += 5) {
-            const timeValue = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        const hourValue = String(hour).padStart(2, '0');
 
-            const startOption = document.createElement('option');
-            startOption.value = timeValue;
-            startOption.textContent = timeValue;
-            startTimeSelect.appendChild(startOption);
+        const startHourOption = document.createElement('option');
+        startHourOption.value = hourValue;
+        startHourOption.textContent = hourValue;
+        startHourSelect.appendChild(startHourOption);
 
-            const endOption = document.createElement('option');
-            endOption.value = timeValue;
-            endOption.textContent = timeValue;
-            endTimeSelect.appendChild(endOption);
-        }
+        const endHourOption = document.createElement('option');
+        endHourOption.value = hourValue;
+        endHourOption.textContent = hourValue;
+        endHourSelect.appendChild(endHourOption);
+    }
+
+    // 분 옵션 생성 (0, 10, 20, 30, 40, 50)
+    for (let minute = 0; minute <= 50; minute += 10) {
+        const minuteValue = String(minute).padStart(2, '0');
+
+        const startMinuteOption = document.createElement('option');
+        startMinuteOption.value = minuteValue;
+        startMinuteOption.textContent = minuteValue;
+        startMinuteSelect.appendChild(startMinuteOption);
+
+        const endMinuteOption = document.createElement('option');
+        endMinuteOption.value = minuteValue;
+        endMinuteOption.textContent = minuteValue;
+        endMinuteSelect.appendChild(endMinuteOption);
     }
 }
 
 // 페이지 로드 시 시간 옵션 생성
 generateTimeOptions();
 
-// 로그인한 사용자 정보 가져오기 및 영어이름 표시
+// 로그인한 사용자 정보 가져오기
 let currentUserData = null;
 async function loadCurrentUser() {
     if (currentUser) {
@@ -34,14 +47,9 @@ async function loadCurrentUser() {
             const userDoc = await usersCollection.doc(currentUser.email).get();
             if (userDoc.exists) {
                 currentUserData = userDoc.data();
-                const englishName = currentUserData.englishName || currentUser.email;
-                document.getElementById('reporter').value = englishName;
-            } else {
-                document.getElementById('reporter').value = currentUser.email;
             }
         } catch (error) {
             console.error('사용자 정보 로드 오류:', error);
-            document.getElementById('reporter').value = currentUser.email;
         }
     } else {
         window.location.href = 'index.html';
@@ -66,6 +74,15 @@ document.getElementById('leaveDays').addEventListener('change', function() {
 document.getElementById('leaveForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // 시간 조합
+    const startHour = document.getElementById('startHour').value;
+    const startMinute = document.getElementById('startMinute').value;
+    const endHour = document.getElementById('endHour').value;
+    const endMinute = document.getElementById('endMinute').value;
+
+    const startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
+    const endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
+
     // 폼 데이터 수집
     const leaveDays = document.getElementById('leaveDays').value === '기타'
         ? document.getElementById('customDays').value
@@ -79,8 +96,8 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         leaveDays: leaveDays,
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
-        startTime: document.getElementById('startTime').value,
-        endTime: document.getElementById('endTime').value,
+        startTime: startTime,
+        endTime: endTime,
         reason: document.getElementById('reason').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };

@@ -16,11 +16,6 @@
         <main>
             <form id="leaveForm" class="form-container">
                 <div class="form-group">
-                    <label for="reporter">신고자 *</label>
-                    <input type="text" id="reporter" name="reporter" required placeholder="로그인한 이메일" readonly style="background-color: #f0f0f0;">
-                </div>
-
-                <div class="form-group">
                     <label for="leaveType">휴가 종류 *</label>
                     <select id="leaveType" name="leaveType" required>
                         <option value="">선택하세요</option>
@@ -76,26 +71,37 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="startTime">시작 시간 (시작일에 시작시간 입력) *</label>
-                    <select id="startTime" name="startTime" required class="time-select">
-                        <option value="">선택하세요</option>
-                    </select>
+                    <label>시작 시간 (시작일에 시작시간 입력) *</label>
+                    <div class="time-input-group">
+                        <select id="startHour" name="startHour" required class="time-select">
+                            <option value="">시</option>
+                        </select>
+                        <span>:</span>
+                        <select id="startMinute" name="startMinute" required class="time-select">
+                            <option value="">분</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="endTime">종료 시간 (종료일에 종료시간 입력) *</label>
-                    <select id="endTime" name="endTime" required class="time-select">
-                        <option value="">선택하세요</option>
-                    </select>
+                    <label>종료 시간 (종료일에 종료시간 입력) *</label>
+                    <div class="time-input-group">
+                        <select id="endHour" name="endHour" required class="time-select">
+                            <option value="">시</option>
+                        </select>
+                        <span>:</span>
+                        <select id="endMinute" name="endMinute" required class="time-select">
+                            <option value="">분</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="reason">사유</label>
-                    <textarea id="reason" name="reason" rows="4" placeholder="추가 사유를 입력하세요 (선택사항)"></textarea>
+                    <textarea id="reason" name="reason" rows="2" placeholder="추가 사유를 입력하세요 (선택사항)"></textarea>
                 </div>
 
                 <div class="button-group">
-                    <button type="button" class="btn-secondary" onclick="window.location.href='main.html'">취소</button>
                     <button type="submit" class="btn-primary">제출</button>
                 </div>
             </form>

@@ -42,7 +42,7 @@ function generateTimeOptions() {
 // 페이지 로드 시 시간 옵션 생성
 generateTimeOptions();
 
-// 로그인한 사용자 정보 가져오기 및 영어이름 표시
+// 로그인한 사용자 정보 가져오기
 let currentUserData = null;
 async function loadCurrentUser() {
     if (currentUser) {
@@ -50,14 +50,9 @@ async function loadCurrentUser() {
             const userDoc = await usersCollection.doc(currentUser.email).get();
             if (userDoc.exists) {
                 currentUserData = userDoc.data();
-                const englishName = currentUserData.englishName || currentUser.email;
-                document.getElementById('reporter').value = englishName;
-            } else {
-                document.getElementById('reporter').value = currentUser.email;
             }
         } catch (error) {
             console.error('사용자 정보 로드 오류:', error);
-            document.getElementById('reporter').value = currentUser.email;
         }
     } else {
         window.location.href = 'index.html';
