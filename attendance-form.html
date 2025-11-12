@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근태 신고</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-button">← 돌아가기</a>
+            <h1>근태 신고</h1>
+        </header>
+
+        <main>
+            <form id="attendanceForm" class="form-container">
+                <div class="form-group">
+                    <label for="reporter">신고자 *</label>
+                    <input type="text" id="reporter" name="reporter" required placeholder="로그인한 이메일" readonly style="background-color: #f0f0f0;">
+                </div>
+
+                <div class="form-group">
+                    <label for="attendanceType">근태 내용 *</label>
+                    <select id="attendanceType" name="attendanceType" required>
+                        <option value="">선택하세요</option>
+                        <option value="출근지연">출근지연</option>
+                        <option value="외출">외출</option>
+                        <option value="조기퇴근">조기퇴근</option>
+                        <option value="당직">당직</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">일자 *</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="startTime">시작 시간 *</label>
+                    <input type="time" id="startTime" name="startTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endTime">종료 시간</label>
+                    <input type="time" id="endTime" name="endTime" placeholder="해당되는 경우 입력">
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">사유 *</label>
+                    <textarea id="reason" name="reason" rows="4" required placeholder="사유를 입력하세요"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">취소</button>
+                    <button type="submit" class="btn-primary">제출</button>
+                </div>
+            </form>
+
+            <div id="message" class="message"></div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="attendance-form.js"></script>
+</body>
+</html>

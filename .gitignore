@@ -1,0 +1,27 @@
+# Node modules
+node_modules/
+
+# 환경 변수 파일
+.env
+
+# 로그 파일
+*.log
+npm-debug.log*
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 빌드 파일
+dist/
+build/
+
+# Windows 예약된 파일명
+nul
+.firebase/

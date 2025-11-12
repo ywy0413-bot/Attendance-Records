@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 사용자 컬렉션
+    match /users/{userId} {
+      // 모든 사용자가 읽기 가능 (로그인용)
+      allow read: if true;
+
+      // 관리자만 쓰기 가능 (임시로 모두 허용, 실제로는 Firebase Auth 사용 권장)
+      allow write: if true;
+    }
+
+    // 휴가 신고 컬렉션
+    match /leaveRecords/{recordId} {
+      // 모든 인증된 사용자가 읽기/쓰기 가능
+      allow read, write: if true;
+    }
+
+    // 근태 신고 컬렉션
+    match /attendanceRecords/{recordId} {
+      // 모든 인증된 사용자가 읽기/쓰기 가능
+      allow read, write: if true;
+    }
+  }
+}

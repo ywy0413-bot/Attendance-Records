@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴가 신고</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-button">← 돌아가기</a>
+            <h1>휴가 신고</h1>
+        </header>
+
+        <main>
+            <form id="leaveForm" class="form-container">
+                <div class="form-group">
+                    <label for="reporter">신고자 *</label>
+                    <input type="text" id="reporter" name="reporter" required placeholder="로그인한 이메일" readonly style="background-color: #f0f0f0;">
+                </div>
+
+                <div class="form-group">
+                    <label for="leaveType">휴가 종류 *</label>
+                    <select id="leaveType" name="leaveType" required>
+                        <option value="">선택하세요</option>
+                        <option value="전일휴가">전일휴가</option>
+                        <option value="반차휴가">반차휴가</option>
+                        <option value="반반차휴가">반반차휴가</option>
+                        <option value="경조휴가">경조휴가</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="leaveDays">휴가일수 *</label>
+                    <select id="leaveDays" name="leaveDays" required>
+                        <option value="">선택하세요</option>
+                        <option value="0.25">0.25일 (반반차)</option>
+                        <option value="0.5">0.5일 (반차)</option>
+                        <option value="0.75">0.75일</option>
+                        <option value="1">1일</option>
+                        <option value="1.25">1.25일</option>
+                        <option value="1.5">1.5일</option>
+                        <option value="1.75">1.75일</option>
+                        <option value="2">2일</option>
+                        <option value="2.25">2.25일</option>
+                        <option value="2.5">2.5일</option>
+                        <option value="2.75">2.75일</option>
+                        <option value="3">3일</option>
+                        <option value="3.25">3.25일</option>
+                        <option value="3.5">3.5일</option>
+                        <option value="3.75">3.75일</option>
+                        <option value="4">4일</option>
+                        <option value="4.25">4.25일</option>
+                        <option value="4.5">4.5일</option>
+                        <option value="4.75">4.75일</option>
+                        <option value="5">5일</option>
+                        <option value="기타">기타 (직접입력)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customDaysGroup" style="display: none;">
+                    <label for="customDays">휴가일수 입력</label>
+                    <input type="number" id="customDays" name="customDays" min="0" step="0.25" placeholder="휴가일수를 입력하세요">
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">시작 일자 *</label>
+                    <input type="date" id="startDate" name="startDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">종료 일자 *</label>
+                    <input type="date" id="endDate" name="endDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="startTime">시작 시간 (시작일에 시작시간 입력) *</label>
+                    <input type="time" id="startTime" name="startTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endTime">종료 시간 (종료일에 종료시간 입력) *</label>
+                    <input type="time" id="endTime" name="endTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="isSpecialLeave">경조휴가 여부 *</label>
+                    <select id="isSpecialLeave" name="isSpecialLeave" required>
+                        <option value="">선택하세요</option>
+                        <option value="아니오">아니오</option>
+                        <option value="예">예</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="specialLeaveReasonGroup" style="display: none;">
+                    <label for="specialLeaveReason">경조사 사유</label>
+                    <input type="text" id="specialLeaveReason" name="specialLeaveReason" placeholder="예: 결혼, 사망 등">
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">사유</label>
+                    <textarea id="reason" name="reason" rows="4" placeholder="추가 사유를 입력하세요 (선택사항)"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">취소</button>
+                    <button type="submit" class="btn-primary">제출</button>
+                </div>
+            </form>
+
+            <div id="message" class="message"></div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="leave-form.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴가 및 근태 신고 시스템</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>휴가 및 근태 신고 시스템</h1>
+            <div class="user-info">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="btn-logout">로그아웃</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="menu-grid">
+                <a href="leave-form.html" class="menu-card">
+                    <div class="card-icon">🏖️</div>
+                    <h2>휴가 신고</h2>
+                    <p>전일휴가, 반차, 반반차, 경조휴가</p>
+                </a>
+
+                <a href="attendance-form.html" class="menu-card">
+                    <div class="card-icon">⏰</div>
+                    <h2>근태 신고</h2>
+                    <p>출근지연, 외출, 조기퇴근, 당직</p>
+                </a>
+
+                <a href="admin.html" class="menu-card" id="adminLink" style="display: none;">
+                    <div class="card-icon">⚙️</div>
+                    <h2>관리자 페이지</h2>
+                    <p>사용자 관리</p>
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Attendance Records System</p>
+        </footer>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // 사용자 이메일 표시
+        if (currentUser) {
+            document.getElementById('userEmail').textContent = currentUser.email;
+
+            // 관리자 권한 확인
+            const adminEmails = ['admin@company.com', 'manager@company.com'];
+            if (adminEmails.includes(currentUser.email)) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

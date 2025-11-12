@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴가 통계</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="main.html" class="back-button">← 메인으로</a>
+            <h1>휴가 통계</h1>
+            <div class="user-info">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="btn-logout">로그아웃</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="stats-container">
+                <div class="filter-section">
+                    <label for="yearFilter">연도 선택:</label>
+                    <select id="yearFilter" onchange="filterByYear()">
+                        <option value="all">전체</option>
+                    </select>
+                </div>
+
+                <div class="summary-section">
+                    <div class="summary-card">
+                        <h3>총 휴가 사용일수</h3>
+                        <p id="totalDays" class="summary-value">0일</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>총 휴가 신고 건수</h3>
+                        <p id="totalCount" class="summary-value">0건</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>신고일</th>
+                                <th>휴가 종류</th>
+                                <th>시작일</th>
+                                <th>종료일</th>
+                                <th>휴가일수</th>
+                                <th>시작시간</th>
+                                <th>종료시간</th>
+                                <th>사유</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBody">
+                            <tr>
+                                <td colspan="8" class="loading-message">데이터를 불러오는 중...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Attendance Records System</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="leave-stats.js"></script>
+</body>
+</html>

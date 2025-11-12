@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 휴가 및 근태 신고</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>휴가 및 근태 신고 시스템</h1>
+        </header>
+
+        <main>
+            <form id="loginForm" class="form-container">
+                <div class="login-icon">🔐</div>
+                <h2 style="text-align: center; margin-bottom: 30px; color: #667eea;">로그인</h2>
+
+                <div class="form-group">
+                    <label for="email">이메일 *</label>
+                    <input type="email" id="email" name="email" required placeholder="your-email@company.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="pin">PIN 번호 (4자리) *</label>
+                    <input type="password" id="pin" name="pin" required maxlength="4" pattern="[0-9]{4}" placeholder="4자리 숫자" inputmode="numeric">
+                    <small style="color: #666; font-size: 12px;">숫자 4자리를 입력하세요</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="rememberMe" name="rememberMe" style="width: auto; margin-right: 8px;">
+                        <span>이 기기에서 자동 로그인</span>
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-primary" style="width: 100%;">로그인</button>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <small style="color: #666;">
+                        처음 사용하시나요? PIN 번호는 관리자에게 문의하세요.
+                    </small>
+                </div>
+            </form>
+
+            <div id="message" class="message"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Attendance Records System</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script src="login-firebase.js"></script>
+</body>
+</html>

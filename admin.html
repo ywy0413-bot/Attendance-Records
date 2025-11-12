@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 사용자 관리</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container admin-container">
+        <header>
+            <a href="index.html" class="back-button">← 메인으로</a>
+            <h1>관리자 페이지</h1>
+            <div class="user-info">
+                <span id="adminEmail"></span>
+                <button onclick="logout()" class="btn-logout">로그아웃</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- 사용자 추가 폼 -->
+            <div class="admin-section">
+                <h2>새 사용자 등록</h2>
+                <form id="addUserForm" class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newUserEmail">이메일 *</label>
+                            <input type="email" id="newUserEmail" name="newUserEmail" required placeholder="user@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserName">이름 *</label>
+                            <input type="text" id="newUserName" name="newUserName" required placeholder="홍길동">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newUserPin">PIN (4자리) *</label>
+                            <input type="password" id="newUserPin" name="newUserPin" required maxlength="4" pattern="[0-9]{4}" placeholder="1234">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserDept">부서</label>
+                            <input type="text" id="newUserDept" name="newUserDept" placeholder="개발팀">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">사용자 추가</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 사용자 목록 -->
+            <div class="admin-section">
+                <h2>등록된 사용자 목록</h2>
+                <div class="search-box">
+                    <input type="text" id="searchUser" placeholder="이메일 또는 이름으로 검색..." onkeyup="filterUsers()">
+                </div>
+                <div class="user-table-container">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>이메일</th>
+                                <th>이름</th>
+                                <th>부서</th>
+                                <th>등록일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-message">사용자 정보를 불러오는 중...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="message" class="message"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Attendance Records System - Admin</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
