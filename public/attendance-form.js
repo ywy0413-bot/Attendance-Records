@@ -42,12 +42,29 @@ function generateTimeOptions() {
 // 페이지 로드 시 시간 옵션 생성
 generateTimeOptions();
 
-// 로그인한 사용자 정보 가져오기
-if (currentUser) {
-    document.getElementById('reporter').value = currentUser.englishName || currentUser.name || currentUser.email;
-} else {
-    window.location.href = 'index.html';
+// 로그인한 사용자 정보 가져오기 및 영어이름 표시
+let currentUserData = null;
+async function loadCurrentUser() {
+    if (currentUser) {
+        try {
+            const userDoc = await usersCollection.doc(currentUser.email).get();
+            if (userDoc.exists) {
+                currentUserData = userDoc.data();
+                const englishName = currentUserData.englishName || currentUser.email;
+                document.getElementById('reporter').value = englishName;
+            } else {
+                document.getElementById('reporter').value = currentUser.email;
+            }
+        } catch (error) {
+            console.error('사용자 정보 로드 오류:', error);
+            document.getElementById('reporter').value = currentUser.email;
+        }
+    } else {
+        window.location.href = 'index.html';
+    }
 }
+
+loadCurrentUser();
 
 // 폼 제출 처리
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
@@ -65,8 +82,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
     // 폼 데이터 수집
     const attendanceData = {
         reporter: currentUser.email,
-        reporterName: currentUser.name || currentUser.email,
-        reporterEnglishName: currentUser.englishName || currentUser.name || currentUser.email,
+        reporterName: currentUserData?.name || currentUser.email,
+        reporterEnglishName: currentUserData?.englishName || currentUser.email,
         attendanceType: document.getElementById('attendanceType').value,
         date: document.getElementById('date').value,
         startTime: startTime,
