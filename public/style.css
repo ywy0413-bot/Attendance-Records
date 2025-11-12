@@ -537,6 +537,7 @@ footer {
 
 .stats-table {
     width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     background: white;
 }
@@ -551,6 +552,7 @@ footer {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
 }
 
 .stats-table th {
@@ -570,10 +572,27 @@ footer {
     border-bottom: none;
 }
 
+/* 삭제 버튼 스타일 */
+.btn-delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
 /* 통계 페이지 모바일 반응형 */
 @media (max-width: 768px) {
     .stats-container {
-        padding: 15px;
+        padding: 10px;
     }
 
     .filter-section {
@@ -590,15 +609,25 @@ footer {
     }
 
     .summary-value {
-        font-size: 24px;
+        font-size: 20px;
+    }
+
+    .table-container {
+        margin: 0 -10px;
+        border-radius: 0;
     }
 
     .stats-table {
-        font-size: 12px;
+        font-size: 11px;
+        min-width: 550px;
     }
 
     .stats-table th,
     .stats-table td {
-        padding: 8px 10px;
+        padding: 6px 5px;
+    }
+
+    .stats-table th {
+        font-size: 11px;
     }
 }

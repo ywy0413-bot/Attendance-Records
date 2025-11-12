@@ -27,8 +27,14 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS || 'your-password' // 실제 비밀번호로 변경 필요
     },
     tls: {
-        ciphers: 'SSLv3'
-    }
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+    },
+    connectionTimeout: 60000, // 60초 연결 타임아웃
+    greetingTimeout: 30000, // 30초 greeting 타임아웃
+    socketTimeout: 60000, // 60초 소켓 타임아웃
+    debug: true, // 디버그 모드 활성화
+    logger: true // 로깅 활성화
 });
 
 // 간단한 사용자 데이터베이스 (실제로는 데이터베이스를 사용해야 합니다)
@@ -166,7 +172,9 @@ app.post('/api/leave', async (req, res) => {
             html: emailBody
         };
 
-        await transporter.sendMail(mailOptions);
+        console.log('이메일 발송 시도 중...');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('이메일 발송 성공:', info.messageId);
 
         res.status(200).json({
             success: true,
@@ -175,6 +183,13 @@ app.post('/api/leave', async (req, res) => {
 
     } catch (error) {
         console.error('휴가 신고 처리 중 오류:', error);
+        console.error('에러 상세:', {
+            message: error.message,
+            code: error.code,
+            command: error.command,
+            responseCode: error.responseCode,
+            response: error.response
+        });
         res.status(500).json({
             success: false,
             message: '서버 오류가 발생했습니다: ' + error.message
@@ -265,7 +280,9 @@ app.post('/api/attendance', async (req, res) => {
             html: emailBody
         };
 
-        await transporter.sendMail(mailOptions);
+        console.log('이메일 발송 시도 중...');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('이메일 발송 성공:', info.messageId);
 
         res.status(200).json({
             success: true,
@@ -274,6 +291,13 @@ app.post('/api/attendance', async (req, res) => {
 
     } catch (error) {
         console.error('근태 신고 처리 중 오류:', error);
+        console.error('에러 상세:', {
+            message: error.message,
+            code: error.code,
+            command: error.command,
+            responseCode: error.responseCode,
+            response: error.response
+        });
         res.status(500).json({
             success: false,
             message: '서버 오류가 발생했습니다: ' + error.message
@@ -286,8 +310,23 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
+// SMTP 연결 테스트
+transporter.verify(function(error, success) {
+    if (error) {
+        console.error('SMTP 연결 실패:', error);
+        console.error('에러 상세:', {
+            message: error.message,
+            code: error.code,
+            command: error.command
+        });
+    } else {
+        console.log('SMTP 서버 연결 성공! 이메일 발송 준비 완료');
+    }
+});
+
 // 서버 시작
 app.listen(PORT, () => {
     console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
     console.log('이메일 설정을 확인하세요!');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER);
 });

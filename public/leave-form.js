@@ -94,12 +94,12 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         // Firestore에 저장
         await leaveRecordsCollection.add(leaveData);
 
-        // 이메일 발송 API 호출 (로컬 서버 필요) - 5초 타임아웃
+        // 이메일 발송 API 호출 - 30초 타임아웃 (Render 무료 티어 서버 시작 시간 포함)
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 타임아웃
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-            const emailResponse = await fetch('http://localhost:3000/api/leave', {
+            const emailResponse = await fetch('https://attendance-records.onrender.com/api/leave', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

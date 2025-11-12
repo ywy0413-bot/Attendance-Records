@@ -58,12 +58,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         // Firestore에 저장
         await attendanceRecordsCollection.add(attendanceData);
 
-        // 이메일 발송 API 호출 (로컬 서버 필요) - 5초 타임아웃
+        // 이메일 발송 API 호출 - 30초 타임아웃 (Render 무료 티어 서버 시작 시간 포함)
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-            const emailResponse = await fetch('http://localhost:3000/api/attendance', {
+            const emailResponse = await fetch('https://attendance-records.onrender.com/api/attendance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
