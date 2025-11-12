@@ -89,8 +89,11 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         ? `${attendanceData.startTime} ~ ${attendanceData.endTime} ${timeDuration}`
         : attendanceData.startTime;
 
+    // 이메일 제목
+    const emailSubject = `[근태신고] ${attendanceData.reporterEnglishName}(${attendanceData.date}, ${attendanceData.attendanceType})`;
+
     // 확인 팝업 표시
-    const confirmMessage = `다음 내용으로 근태 신고를 제출하시겠습니까?
+    const confirmMessage = `${emailSubject}
 
 1. 신고자: ${attendanceData.reporterEnglishName}
 2. 근태 내용: ${attendanceData.attendanceType}

@@ -93,8 +93,11 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         ? leaveData.startDate
         : `${leaveData.startDate} ~ ${leaveData.endDate}`;
 
+    // 이메일 제목
+    const emailSubject = `[휴가신고] ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
+
     // 확인 팝업 표시
-    const confirmMessage = `다음 내용으로 휴가 신고를 제출하시겠습니까?
+    const confirmMessage = `${emailSubject}
 
 1. 신고자: ${leaveData.reporterEnglishName}
 2. 휴가 일수: ${leaveData.leaveDays}일
