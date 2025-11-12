@@ -5,8 +5,8 @@ function generateTimeOptions() {
     const endHourSelect = document.getElementById('endHour');
     const endMinuteSelect = document.getElementById('endMinute');
 
-    // 시간 옵션 생성 (00 ~ 23)
-    for (let hour = 0; hour <= 23; hour++) {
+    // 시간 옵션 생성 (08 ~ 18)
+    for (let hour = 8; hour <= 18; hour++) {
         const hourValue = String(hour).padStart(2, '0');
 
         const startHourOption = document.createElement('option');
@@ -72,15 +72,31 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
+    // 시간차 계산
+    let timeDuration = '';
+    if (attendanceData.startTime && attendanceData.endTime) {
+        const [startH, startM] = attendanceData.startTime.split(':').map(Number);
+        const [endH, endM] = attendanceData.endTime.split(':').map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+        const diffMinutes = endMinutes - startMinutes;
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        timeDuration = `(${hours}시간 ${minutes}분)`;
+    }
+
+    const timeDisplay = attendanceData.endTime
+        ? `${attendanceData.startTime} ~ ${attendanceData.endTime} ${timeDuration}`
+        : attendanceData.startTime;
+
     // 확인 팝업 표시
     const confirmMessage = `다음 내용으로 근태 신고를 제출하시겠습니까?
 
-신고자: ${attendanceData.reporterEnglishName}
-근태 내용: ${attendanceData.attendanceType}
-일자: ${attendanceData.date}
-시작 시간: ${attendanceData.startTime}
-종료 시간: ${attendanceData.endTime || '(없음)'}
-사유: ${attendanceData.reason}
+1. 신고자: ${attendanceData.reporterEnglishName}
+2. 근태 내용: ${attendanceData.attendanceType}
+3. 일자: ${attendanceData.date}
+4. 시간: ${timeDisplay}
+5. 사유: ${attendanceData.reason}
 
 이메일로 발송됩니다.`;
 

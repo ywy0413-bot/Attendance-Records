@@ -89,6 +89,14 @@ app.post('/api/leave', async (req, res) => {
             reason
         } = req.body;
 
+        // 시간 표시 형식
+        const timeDisplay = `${startTime} ~ ${endTime}`;
+
+        // 일자 표시 형식
+        const dateDisplay = startDate === endDate
+            ? startDate
+            : `${startDate} ~ ${endDate}`;
+
         // 이메일 제목 생성: [휴가신고] EnglishName(StartDate, LeaveType, LeaveDays)
         const emailSubject = `[휴가신고] ${reporterEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
         const emailBody = `
@@ -102,7 +110,7 @@ app.post('/api/leave', async (req, res) => {
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; }
         .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; }
         .info-row { margin: 15px 0; padding: 10px; background: white; border-radius: 5px; }
-        .label { font-weight: bold; color: #667eea; display: inline-block; width: 150px; }
+        .label { font-weight: bold; color: #667eea; display: inline-block; width: 100px; }
         .value { display: inline-block; }
         .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
     </style>
@@ -114,43 +122,21 @@ app.post('/api/leave', async (req, res) => {
         </div>
         <div class="content">
             <div class="info-row">
-                <span class="label">신고자:</span>
-                <span class="value">${reporterEnglishName} (${reporterName})</span>
+                <span class="label">1. 신고자:</span>
+                <span class="value">${reporterEnglishName} (${reporterName}, ${reporter})</span>
             </div>
             <div class="info-row">
-                <span class="label">이메일:</span>
-                <span class="value">${reporter}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">휴가 종류:</span>
-                <span class="value">${leaveType}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">휴가 일수:</span>
+                <span class="label">2. 휴가 일수:</span>
                 <span class="value">${leaveDays}일</span>
             </div>
             <div class="info-row">
-                <span class="label">시작 일자:</span>
-                <span class="value">${startDate}</span>
+                <span class="label">3. 일자:</span>
+                <span class="value">${dateDisplay}</span>
             </div>
             <div class="info-row">
-                <span class="label">종료 일자:</span>
-                <span class="value">${endDate}</span>
+                <span class="label">4. 시간:</span>
+                <span class="value">${timeDisplay}</span>
             </div>
-            <div class="info-row">
-                <span class="label">시작 시간:</span>
-                <span class="value">${startTime}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">종료 시간:</span>
-                <span class="value">${endTime}</span>
-            </div>
-            ${reason ? `
-            <div class="info-row">
-                <span class="label">추가 사유:</span>
-                <span class="value">${reason}</span>
-            </div>
-            ` : ''}
             <div class="info-row">
                 <span class="label">신고 일시:</span>
                 <span class="value">${new Date().toLocaleString('ko-KR')}</span>
@@ -211,6 +197,19 @@ app.post('/api/attendance', async (req, res) => {
             reason
         } = req.body;
 
+        // 시간 표시 계산
+        let timeDisplay = startTime;
+        if (endTime) {
+            const [startH, startM] = startTime.split(':').map(Number);
+            const [endH, endM] = endTime.split(':').map(Number);
+            const startMinutes = startH * 60 + startM;
+            const endMinutes = endH * 60 + endM;
+            const diffMinutes = endMinutes - startMinutes;
+            const hours = Math.floor(diffMinutes / 60);
+            const minutes = diffMinutes % 60;
+            timeDisplay = `${startTime} ~ ${endTime} (${hours}시간 ${minutes}분)`;
+        }
+
         // 이메일 제목 생성: [근태신고] EnglishName(Date, AttendanceType)
         const emailSubject = `[근태신고] ${reporterEnglishName}(${date}, ${attendanceType})`;
         const emailBody = `
@@ -224,7 +223,7 @@ app.post('/api/attendance', async (req, res) => {
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; }
         .content { background: #f9f9f9; padding: 20px; border: 1px solid #e0e0e0; }
         .info-row { margin: 15px 0; padding: 10px; background: white; border-radius: 5px; }
-        .label { font-weight: bold; color: #667eea; display: inline-block; width: 150px; }
+        .label { font-weight: bold; color: #667eea; display: inline-block; width: 100px; }
         .value { display: inline-block; }
         .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
     </style>
@@ -236,33 +235,23 @@ app.post('/api/attendance', async (req, res) => {
         </div>
         <div class="content">
             <div class="info-row">
-                <span class="label">신고자:</span>
-                <span class="value">${reporterEnglishName} (${reporterName})</span>
+                <span class="label">1. 신고자:</span>
+                <span class="value">${reporterEnglishName} (${reporterName}, ${reporter})</span>
             </div>
             <div class="info-row">
-                <span class="label">이메일:</span>
-                <span class="value">${reporter}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">근태 내용:</span>
+                <span class="label">2. 근태 내용:</span>
                 <span class="value">${attendanceType}</span>
             </div>
             <div class="info-row">
-                <span class="label">일자:</span>
+                <span class="label">3. 일자:</span>
                 <span class="value">${date}</span>
             </div>
             <div class="info-row">
-                <span class="label">시작 시간:</span>
-                <span class="value">${startTime}</span>
+                <span class="label">4. 시간:</span>
+                <span class="value">${timeDisplay}</span>
             </div>
-            ${endTime ? `
             <div class="info-row">
-                <span class="label">종료 시간:</span>
-                <span class="value">${endTime}</span>
-            </div>
-            ` : ''}
-            <div class="info-row">
-                <span class="label">사유:</span>
+                <span class="label">5. 사유:</span>
                 <span class="value">${reason}</span>
             </div>
             <div class="info-row">
