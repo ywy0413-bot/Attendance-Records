@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -16,26 +16,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // 정적 파일 제공
 app.use(express.static(__dirname));
 
-// Nodemailer 설정 (Outlook/Office 365)
-// 실제 사용 시 환경 변수로 관리하는 것을 권장합니다
-const transporter = nodemailer.createTransport({
-    host: 'smtp.office365.com',
-    port: 587,
-    secure: false, // TLS 사용
-    auth: {
-        user: process.env.EMAIL_USER || 'your-email@company.com', // 실제 이메일로 변경 필요
-        pass: process.env.EMAIL_PASS || 'your-password' // 실제 비밀번호로 변경 필요
-    },
-    tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
-    },
-    connectionTimeout: 60000, // 60초 연결 타임아웃
-    greetingTimeout: 30000, // 30초 greeting 타임아웃
-    socketTimeout: 60000, // 60초 소켓 타임아웃
-    debug: true, // 디버그 모드 활성화
-    logger: true // 로깅 활성화
-});
+// SendGrid 설정
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// 발신자 이메일 (SendGrid에서 인증한 이메일)
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@yourdomain.com';
+// 수신자 이메일 (실제 알림을 받을 이메일)
+const TO_EMAIL = process.env.TO_EMAIL || 'wyyu@envision.co.kr';
 
 // 간단한 사용자 데이터베이스 (실제로는 데이터베이스를 사용해야 합니다)
 // 형식: { email: pin }
@@ -123,7 +110,7 @@ app.post('/api/leave', async (req, res) => {
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>
-                <span class="value">${reporterEnglishName} (${reporterName}, ${reporter})</span>
+                <span class="value">${reporterEnglishName}</span>
             </div>
             <div class="info-row">
                 <span class="label">2. 휴가 일수:</span>
@@ -150,17 +137,20 @@ app.post('/api/leave', async (req, res) => {
 </html>
         `;
 
-        // 이메일 발송 - 테스트용 wyyu@envision.co.kr
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'your-email@company.com',
-            to: 'wyyu@envision.co.kr', // 테스트 메일 주소
+        // SendGrid 이메일 발송
+        const msg = {
+            to: TO_EMAIL,
+            from: {
+                email: FROM_EMAIL,
+                name: reporterEnglishName
+            },
             subject: emailSubject,
             html: emailBody
         };
 
         console.log('이메일 발송 시도 중...');
-        const info = await transporter.sendMail(mailOptions);
-        console.log('이메일 발송 성공:', info.messageId);
+        await sgMail.send(msg);
+        console.log('이메일 발송 성공');
 
         res.status(200).json({
             success: true,
@@ -169,13 +159,9 @@ app.post('/api/leave', async (req, res) => {
 
     } catch (error) {
         console.error('휴가 신고 처리 중 오류:', error);
-        console.error('에러 상세:', {
-            message: error.message,
-            code: error.code,
-            command: error.command,
-            responseCode: error.responseCode,
-            response: error.response
-        });
+        if (error.response) {
+            console.error('SendGrid 에러:', error.response.body);
+        }
         res.status(500).json({
             success: false,
             message: '서버 오류가 발생했습니다: ' + error.message
@@ -238,7 +224,7 @@ app.post('/api/attendance', async (req, res) => {
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>
-                <span class="value">${reporterEnglishName} (${reporterName}, ${reporter})</span>
+                <span class="value">${reporterEnglishName}</span>
             </div>
             <div class="info-row">
                 <span class="label">2. 근태 내용:</span>
@@ -269,17 +255,20 @@ app.post('/api/attendance', async (req, res) => {
 </html>
         `;
 
-        // 이메일 발송
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'your-email@company.com',
-            to: process.env.COMPANY_EMAIL || 'company-all@company.com', // 전사 메일 주소
+        // SendGrid 이메일 발송
+        const msg = {
+            to: TO_EMAIL,
+            from: {
+                email: FROM_EMAIL,
+                name: reporterEnglishName
+            },
             subject: emailSubject,
             html: emailBody
         };
 
         console.log('이메일 발송 시도 중...');
-        const info = await transporter.sendMail(mailOptions);
-        console.log('이메일 발송 성공:', info.messageId);
+        await sgMail.send(msg);
+        console.log('이메일 발송 성공');
 
         res.status(200).json({
             success: true,
@@ -288,13 +277,9 @@ app.post('/api/attendance', async (req, res) => {
 
     } catch (error) {
         console.error('근태 신고 처리 중 오류:', error);
-        console.error('에러 상세:', {
-            message: error.message,
-            code: error.code,
-            command: error.command,
-            responseCode: error.responseCode,
-            response: error.response
-        });
+        if (error.response) {
+            console.error('SendGrid 에러:', error.response.body);
+        }
         res.status(500).json({
             success: false,
             message: '서버 오류가 발생했습니다: ' + error.message
@@ -311,36 +296,18 @@ app.get('/health', (req, res) => {
     });
 });
 
-// SMTP 상태 확인 엔드포인트
+// SendGrid 상태 확인 엔드포인트
 app.get('/api/smtp-status', async (req, res) => {
-    try {
-        await transporter.verify();
-        res.status(200).json({
-            status: 'connected',
-            message: 'SMTP 서버 연결 성공',
-            config: {
-                host: 'smtp.office365.com',
-                port: 587,
-                user: process.env.EMAIL_USER ? '설정됨' : '미설정',
-                pass: process.env.EMAIL_PASS ? '설정됨' : '미설정'
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: 'error',
-            message: 'SMTP 연결 실패',
-            error: {
-                message: error.message,
-                code: error.code
-            },
-            config: {
-                host: 'smtp.office365.com',
-                port: 587,
-                user: process.env.EMAIL_USER ? '설정됨' : '미설정',
-                pass: process.env.EMAIL_PASS ? '설정됨' : '미설정'
-            }
-        });
-    }
+    res.status(200).json({
+        status: 'ready',
+        message: 'SendGrid 설정 완료',
+        config: {
+            service: 'SendGrid',
+            apiKey: process.env.SENDGRID_API_KEY ? '설정됨' : '미설정',
+            fromEmail: process.env.FROM_EMAIL ? '설정됨' : '미설정',
+            toEmail: process.env.TO_EMAIL ? '설정됨' : '미설정'
+        }
+    });
 });
 
 // 메인 페이지 라우트 (로그인 페이지로 리다이렉트)
@@ -348,23 +315,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-// SMTP 연결 테스트
-transporter.verify(function(error, success) {
-    if (error) {
-        console.error('SMTP 연결 실패:', error);
-        console.error('에러 상세:', {
-            message: error.message,
-            code: error.code,
-            command: error.command
-        });
-    } else {
-        console.log('SMTP 서버 연결 성공! 이메일 발송 준비 완료');
-    }
-});
-
 // 서버 시작
 app.listen(PORT, () => {
     console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
-    console.log('이메일 설정을 확인하세요!');
-    console.log('EMAIL_USER:', process.env.EMAIL_USER);
+    console.log('SendGrid 이메일 설정을 확인하세요!');
+    console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? '설정됨' : '미설정');
+    console.log('FROM_EMAIL:', process.env.FROM_EMAIL || 'noreply@yourdomain.com');
+    console.log('TO_EMAIL:', process.env.TO_EMAIL || 'wyyu@envision.co.kr');
 });
