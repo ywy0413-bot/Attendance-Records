@@ -215,15 +215,23 @@ function displayStats(records) {
 
 // 요약 정보 업데이트
 function updateSummary(totalCount, typeCount, totalMinutes = 0) {
-    document.getElementById('totalCount').textContent = `${totalCount}건`;
+    // totalCount 요소가 있으면 업데이트 (제거되었을 수 있음)
+    const totalCountElement = document.getElementById('totalCount');
+    if (totalCountElement) {
+        totalCountElement.textContent = `${totalCount}건`;
+    }
 
-    // 5가지 근태 유형 모두 표시 (0건이어도)
+    // 5가지 근태 유형 모두 표시 (0건이어도) - 2열 그리드로 표시
     const types = ['외출', '출근지연', '조기퇴근', '당직', '전일 야근'];
-    const typeBreakdown = types
-        .map(type => `${type} ${typeCount[type] || 0}건`)
-        .join(', ');
+    const typeBreakdownHTML = `
+        <div class="type-grid">
+            ${types.map(type => `
+                <div class="type-item">${type} ${typeCount[type] || 0}건</div>
+            `).join('')}
+        </div>
+    `;
 
-    document.getElementById('typeBreakdown').textContent = typeBreakdown;
+    document.getElementById('typeBreakdown').innerHTML = typeBreakdownHTML;
 
     // 누계 시간 표시 (시간과 분으로 변환)
     const hours = Math.floor(totalMinutes / 60);

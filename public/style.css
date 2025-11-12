@@ -565,6 +565,22 @@ footer {
     line-height: 1.4;
 }
 
+/* 근태 유형 2열 그리드 */
+.type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 20px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.type-item {
+    text-align: left;
+    font-size: 16px;
+    color: #667eea;
+    font-weight: 600;
+}
+
 /* 휴가 차감 컨트롤 */
 .vacation-deduction {
     display: flex;

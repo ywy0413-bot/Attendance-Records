@@ -236,10 +236,6 @@ app.post('/api/attendance', async (req, res) => {
                 <span class="label">5. 사유:</span>
                 <span class="value">${reason}</span>
             </div>
-            <div class="info-row">
-                <span class="label">신고 일시:</span>
-                <span class="value">${new Date().toLocaleString('ko-KR')}</span>
-            </div>
         </div>
         <div class="footer">
             <p>본 메일은 근태 신고 시스템에서 자동으로 발송된 메일입니다.</p>
