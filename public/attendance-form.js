@@ -61,6 +61,21 @@ async function loadCurrentUser() {
 
 loadCurrentUser();
 
+// 사유 선택 시 직접입력 필드 표시/숨김
+document.getElementById('reasonSelect').addEventListener('change', function() {
+    const customReasonGroup = document.getElementById('customReasonGroup');
+    const customReasonInput = document.getElementById('customReason');
+
+    if (this.value === '직접입력') {
+        customReasonGroup.style.display = 'block';
+        customReasonInput.required = true;
+    } else {
+        customReasonGroup.style.display = 'none';
+        customReasonInput.required = false;
+        customReasonInput.value = '';
+    }
+});
+
 // 폼 제출 처리
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -74,6 +89,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
     const startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
     const endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
 
+    // 사유 값 가져오기
+    const reasonSelect = document.getElementById('reasonSelect').value;
+    const reasonValue = reasonSelect === '직접입력'
+        ? document.getElementById('customReason').value
+        : reasonSelect;
+
     // 폼 데이터 수집
     const attendanceData = {
         reporter: currentUser.email,
@@ -83,7 +104,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         date: document.getElementById('date').value,
         startTime: startTime,
         endTime: endTime,
-        reason: document.getElementById('reason').value,
+        reason: reasonValue,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 

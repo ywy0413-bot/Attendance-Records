@@ -59,8 +59,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="reason">사유 *</label>
-                    <textarea id="reason" name="reason" rows="2" required placeholder="사유를 입력하세요"></textarea>
+                    <label for="reasonSelect">사유 *</label>
+                    <select id="reasonSelect" name="reasonSelect" required>
+                        <option value="">선택하세요</option>
+                        <option value="개인사유">개인사유</option>
+                        <option value="지하철 연착">지하철 연착</option>
+                        <option value="교통체증">교통체증</option>
+                        <option value="자녀 등/하원">자녀 등/하원</option>
+                        <option value="병원 진료">병원 진료</option>
+                        <option value="관공서(은행) 업무">관공서(은행) 업무</option>
+                        <option value="직접입력">직접입력</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customReasonGroup" style="display: none;">
+                    <label for="customReason">사유 직접 입력 *</label>
+                    <textarea id="customReason" name="customReason" rows="2" placeholder="사유를 입력하세요"></textarea>
                 </div>
 
                 <div class="button-group">

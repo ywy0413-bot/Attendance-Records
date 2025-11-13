@@ -734,45 +734,49 @@ footer {
 /* Outlook 신고 추가 섹션 */
 .outlook-add-section {
     background: white;
-    padding: 15px 20px;
-    border-radius: 10px;
+    padding: 12px 15px;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
 
 .outlook-add-section h3 {
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
     color: #667eea;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .outlook-form {
-    display: flex;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     align-items: flex-end;
 }
 
 .outlook-form .form-group {
-    flex: 1;
-    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.outlook-form .form-group:nth-child(3) {
+    grid-column: 1;
 }
 
 .outlook-form label {
-    display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     color: #333;
     font-weight: 500;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .outlook-form select,
 .outlook-form input {
     width: 100%;
-    padding: 8px 10px;
+    padding: 6px 8px;
     border: 2px solid #e0e0e0;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 13px;
     transition: border-color 0.3s;
 }
 
@@ -783,17 +787,19 @@ footer {
 }
 
 .outlook-form .btn-primary {
-    padding: 8px 20px;
+    grid-column: 2;
+    padding: 6px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.3s;
     white-space: nowrap;
-    flex-shrink: 0;
+    align-self: flex-end;
+    height: fit-content;
 }
 
 .outlook-form .btn-primary:hover {
@@ -808,19 +814,20 @@ footer {
 /* Outlook 섹션 모바일 반응형 */
 @media (max-width: 768px) {
     .outlook-add-section {
-        padding: 15px;
+        padding: 12px;
     }
 
     .outlook-form {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         gap: 10px;
     }
 
-    .outlook-form .form-group {
-        min-width: 100%;
+    .outlook-form .form-group:nth-child(3) {
+        grid-column: 1;
     }
 
     .outlook-form .btn-primary {
+        grid-column: 1;
         width: 100%;
     }
 }
