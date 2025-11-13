@@ -139,7 +139,7 @@ function displayStats(records) {
                 <td colspan="7" class="empty-message">휴가 기록이 없습니다.</td>
             </tr>
         `;
-        updateSummary(0, 0);
+        updateSummary(0);
         return;
     }
 
@@ -169,13 +169,12 @@ function displayStats(records) {
     }).join('');
 
     // 요약 정보 업데이트
-    updateSummary(totalDays, records.length);
+    updateSummary(totalDays);
 }
 
 // 요약 정보 업데이트
-function updateSummary(totalDays, totalCount) {
+function updateSummary(totalDays) {
     document.getElementById('totalDays').textContent = `${totalDays}일`;
-    document.getElementById('totalCount').textContent = `${totalCount}건`;
 }
 
 // 휴가 기록 삭제
@@ -202,11 +201,17 @@ async function deleteLeaveRecord(recordId) {
 // Outlook 휴가 신고 추가
 async function addOutlookLeaveRecord() {
     const leaveType = document.getElementById('outlookLeaveType').value;
+    const leaveStartDate = document.getElementById('outlookLeaveStartDate').value;
     const leaveDays = parseFloat(document.getElementById('outlookLeaveDays').value);
 
     // 입력값 검증
     if (!leaveType) {
         alert('휴가 종류를 선택해주세요.');
+        return;
+    }
+
+    if (!leaveStartDate) {
+        alert('휴가 시작일을 선택해주세요.');
         return;
     }
 
@@ -241,8 +246,6 @@ async function addOutlookLeaveRecord() {
     }
 
     try {
-        const today = new Date().toISOString().split('T')[0];
-
         // 시작/종료 시간 계산 (0.25일 = 2시간, 0.5일 = 4시간, 0.75일 = 6시간, 1.0일 = 8시간)
         const hours = Math.floor(leaveDays * 8);
         const startHour = 9;
@@ -258,8 +261,8 @@ async function addOutlookLeaveRecord() {
             reporterEnglishName: currentUser.email,
             leaveType: leaveType,
             leaveDays: leaveDays.toString(),
-            startDate: today,
-            endDate: today,
+            startDate: leaveStartDate,
+            endDate: leaveStartDate,
             startTime: startTime,
             endTime: endTime,
             reason: 'Outlook 신고',
@@ -276,6 +279,7 @@ async function addOutlookLeaveRecord() {
 
         // 입력 필드 초기화
         document.getElementById('outlookLeaveType').value = '';
+        document.getElementById('outlookLeaveStartDate').value = '';
         document.getElementById('outlookLeaveDays').value = '';
 
         // 데이터 다시 불러오기

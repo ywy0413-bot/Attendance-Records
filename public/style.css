@@ -665,6 +665,7 @@ footer {
 
 .stats-table td {
     font-size: 14px;
+    text-align: center;
 }
 
 .stats-table tbody tr:hover {
