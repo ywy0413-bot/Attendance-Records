@@ -144,7 +144,7 @@ function displayStats(records) {
     if (records.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-message">근태 기록이 없습니다.</td>
+                <td colspan="6" class="empty-message">근태 기록이 없습니다.</td>
             </tr>
         `;
         updateSummary(0, {});
@@ -180,21 +180,6 @@ function displayStats(records) {
 
     // 테이블 내용 생성
     tbody.innerHTML = records.map(record => {
-        let createdDate = '알 수 없음';
-
-        if (record.createdAt) {
-            try {
-                if (typeof record.createdAt.toDate === 'function') {
-                    createdDate = formatShortDate(record.createdAt.toDate());
-                } else {
-                    createdDate = formatShortDate(new Date(record.createdAt));
-                }
-            } catch (error) {
-                console.error('날짜 변환 오류:', error);
-                createdDate = '알 수 없음';
-            }
-        }
-
         // 휴가 차감인 경우 시간 표시를 다르게
         let startTimeDisplay = record.startTime || '-';
         let endTimeDisplay = record.endTime || '-';
@@ -206,9 +191,8 @@ function displayStats(records) {
 
         return `
             <tr>
-                <td>${createdDate}</td>
-                <td>${record.attendanceType || '-'}</td>
                 <td>${formatShortDate(record.date)}</td>
+                <td>${record.attendanceType || '-'}</td>
                 <td>${startTimeDisplay}</td>
                 <td>${endTimeDisplay}</td>
                 <td>${record.reason || '-'}</td>

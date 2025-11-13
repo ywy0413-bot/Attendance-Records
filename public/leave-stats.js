@@ -66,7 +66,7 @@ async function loadLeaveStats() {
         console.error('휴가 통계 로드 오류:', error);
         document.getElementById('statsTableBody').innerHTML = `
             <tr>
-                <td colspan="8" class="error-message">데이터를 불러오는데 실패했습니다: ${error.message}</td>
+                <td colspan="7" class="error-message">데이터를 불러오는데 실패했습니다: ${error.message}</td>
             </tr>
         `;
     }
@@ -136,7 +136,7 @@ function displayStats(records) {
     if (records.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-message">휴가 기록이 없습니다.</td>
+                <td colspan="7" class="empty-message">휴가 기록이 없습니다.</td>
             </tr>
         `;
         updateSummary(0, 0);
@@ -155,24 +155,8 @@ function displayStats(records) {
 
     // 테이블 내용 생성
     tbody.innerHTML = records.map(record => {
-        let createdDate = '알 수 없음';
-
-        if (record.createdAt) {
-            try {
-                if (typeof record.createdAt.toDate === 'function') {
-                    createdDate = formatShortDate(record.createdAt.toDate());
-                } else {
-                    createdDate = formatShortDate(new Date(record.createdAt));
-                }
-            } catch (error) {
-                console.error('날짜 변환 오류:', error);
-                createdDate = '알 수 없음';
-            }
-        }
-
         return `
             <tr>
-                <td>${createdDate}</td>
                 <td>${record.leaveType || '-'}</td>
                 <td>${formatShortDate(record.startDate)}</td>
                 <td>${formatShortDate(record.endDate)}</td>
