@@ -198,3 +198,91 @@ async function deleteLeaveRecord(recordId) {
         alert('삭제 중 오류가 발생했습니다: ' + error.message);
     }
 }
+
+// Outlook 휴가 신고 추가
+async function addOutlookLeaveRecord() {
+    const leaveType = document.getElementById('outlookLeaveType').value;
+    const leaveDays = parseFloat(document.getElementById('outlookLeaveDays').value);
+
+    // 입력값 검증
+    if (!leaveType) {
+        alert('휴가 종류를 선택해주세요.');
+        return;
+    }
+
+    if (!leaveDays || leaveDays <= 0) {
+        alert('휴가 일수를 입력해주세요.');
+        return;
+    }
+
+    // 휴가 종류별 일수 검증
+    if (leaveType === '반차' && leaveDays !== 0.5) {
+        alert('휴가 일수를 정확하게 입력해주세요');
+        return;
+    }
+
+    if (leaveType === '반반차' && leaveDays !== 0.25) {
+        alert('휴가 일수를 정확하게 입력해주세요');
+        return;
+    }
+
+    if (leaveType === '반차+반반차' && leaveDays !== 0.75) {
+        alert('휴가 일수를 정확하게 입력해주세요');
+        return;
+    }
+
+    if (leaveType === '전일휴가' && leaveDays < 1.0) {
+        alert('전일휴가는 휴가일수가 1.0일 이상이어야 합니다');
+        return;
+    }
+
+    if (!confirm(`${leaveType} ${leaveDays}일을 추가하시겠습니까?`)) {
+        return;
+    }
+
+    try {
+        const today = new Date().toISOString().split('T')[0];
+
+        // 시작/종료 시간 계산 (0.25일 = 2시간, 0.5일 = 4시간, 0.75일 = 6시간, 1.0일 = 8시간)
+        const hours = Math.floor(leaveDays * 8);
+        const startHour = 9;
+        const endHour = startHour + hours;
+
+        const startTime = `${String(startHour).padStart(2, '0')}:00`;
+        const endTime = `${String(endHour).padStart(2, '0')}:00`;
+
+        // Outlook 휴가 기록 생성
+        const outlookData = {
+            reporter: currentUser.email,
+            reporterName: currentUser.email,
+            reporterEnglishName: currentUser.email,
+            leaveType: leaveType,
+            leaveDays: leaveDays.toString(),
+            startDate: today,
+            endDate: today,
+            startTime: startTime,
+            endTime: endTime,
+            reason: 'Outlook 신고',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isOutlookRecord: true
+        };
+
+        // Firestore에 저장
+        await leaveRecordsCollection.add(outlookData);
+
+        console.log('Outlook 휴가 신고가 추가되었습니다:', outlookData);
+
+        alert(`${leaveType} ${leaveDays}일이 추가되었습니다.`);
+
+        // 입력 필드 초기화
+        document.getElementById('outlookLeaveType').value = '';
+        document.getElementById('outlookLeaveDays').value = '';
+
+        // 데이터 다시 불러오기
+        await loadLeaveStats();
+
+    } catch (error) {
+        console.error('Outlook 휴가 신고 추가 오류:', error);
+        alert('추가 중 오류가 발생했습니다: ' + error.message);
+    }
+}
