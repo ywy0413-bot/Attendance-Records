@@ -20,9 +20,9 @@ app.use(express.static(__dirname));
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // 발신자 이메일 (SendGrid에서 인증한 이메일)
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@yourdomain.com';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'env2760@naver.com';
 // 수신자 이메일 (실제 알림을 받을 이메일)
-const TO_EMAIL = process.env.TO_EMAIL || 'wyyu@envision.co.kr';
+const TO_EMAIL = process.env.TO_EMAIL || 'gwp@envision.co.kr';
 
 // 간단한 사용자 데이터베이스 (실제로는 데이터베이스를 사용해야 합니다)
 // 형식: { email: pin }
