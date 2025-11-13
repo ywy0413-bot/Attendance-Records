@@ -730,3 +730,97 @@ footer {
         font-size: 11px;
     }
 }
+
+/* Outlook 신고 추가 섹션 */
+.outlook-add-section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.outlook-add-section h3 {
+    margin: 0 0 15px 0;
+    color: #667eea;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.outlook-form {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.outlook-form .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.outlook-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.outlook-form select,
+.outlook-form input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.outlook-form select:focus,
+.outlook-form input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.outlook-form .btn-primary {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+    white-space: nowrap;
+}
+
+.outlook-form .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.outlook-form .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Outlook 섹션 모바일 반응형 */
+@media (max-width: 768px) {
+    .outlook-add-section {
+        padding: 15px;
+    }
+
+    .outlook-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .outlook-form .form-group {
+        min-width: 100%;
+    }
+
+    .outlook-form .btn-primary {
+        width: 100%;
+    }
+}

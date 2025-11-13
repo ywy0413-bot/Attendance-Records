@@ -322,3 +322,73 @@ async function deductVacation() {
         alert('차감 중 오류가 발생했습니다: ' + error.message);
     }
 }
+
+// Outlook 신고 추가
+async function addOutlookRecord() {
+    const outlookType = document.getElementById('outlookType').value;
+    const outlookMinutes = parseInt(document.getElementById('outlookMinutes').value);
+
+    // 입력값 검증
+    if (!outlookType) {
+        alert('근태 종류를 선택해주세요.');
+        return;
+    }
+
+    if (!outlookMinutes || outlookMinutes <= 0) {
+        alert('소요시간을 입력해주세요.');
+        return;
+    }
+
+    if (outlookMinutes > 480) {
+        alert('소요시간은 480분(8시간)을 초과할 수 없습니다.');
+        return;
+    }
+
+    if (!confirm(`${outlookType} ${outlookMinutes}분을 추가하시겠습니까?`)) {
+        return;
+    }
+
+    try {
+        // 현재 시간 기준으로 시작/종료 시간 생성 (오늘 날짜)
+        const now = new Date();
+        const startHour = 9; // 기본 시작 시간 09:00
+        const startMinute = 0;
+        const endHour = Math.floor((startMinute + outlookMinutes) / 60) + startHour;
+        const endMinute = (startMinute + outlookMinutes) % 60;
+
+        const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+
+        // Outlook 신고 기록 생성
+        const outlookData = {
+            reporter: currentUser.email,
+            reporterName: currentUser.email,
+            reporterEnglishName: currentUser.email,
+            attendanceType: outlookType,
+            date: now.toISOString().split('T')[0],
+            startTime: startTime,
+            endTime: endTime,
+            reason: '직접입력',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            isOutlookRecord: true // Outlook 기록 표시
+        };
+
+        // Firestore에 저장
+        await attendanceRecordsCollection.add(outlookData);
+
+        console.log('Outlook 신고가 추가되었습니다:', outlookData);
+
+        alert(`${outlookType} ${outlookMinutes}분이 추가되었습니다.`);
+
+        // 입력 필드 초기화
+        document.getElementById('outlookType').value = '';
+        document.getElementById('outlookMinutes').value = '';
+
+        // 데이터 다시 불러오기
+        await loadAttendanceStats();
+
+    } catch (error) {
+        console.error('Outlook 신고 추가 오류:', error);
+        alert('추가 중 오류가 발생했습니다: ' + error.message);
+    }
+}
