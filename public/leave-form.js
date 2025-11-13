@@ -102,6 +102,29 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
+    const leaveDaysNum = parseFloat(leaveData.leaveDays);
+
+    // 0. 휴가 종류와 휴가일수 매칭 검증
+    if (leaveData.leaveType === '반차휴가' && leaveDaysNum !== 0.5) {
+        alert('휴가종류와 휴가일수를 매칭시켜 주세요');
+        return;
+    }
+
+    if (leaveData.leaveType === '반반차 휴가' && leaveDaysNum !== 0.25) {
+        alert('휴가종류와 휴가일수를 매칭시켜 주세요');
+        return;
+    }
+
+    if (leaveData.leaveType === '반차휴가 + 반반차 휴가' && leaveDaysNum !== 0.75) {
+        alert('휴가종류와 휴가일수를 매칭시켜 주세요');
+        return;
+    }
+
+    if (leaveData.leaveType === '전일휴가' && leaveDaysNum < 1.0) {
+        alert('전일휴가는 휴가일수가 1.0일 이상이어야 합니다');
+        return;
+    }
+
     // 1. 종료일이 시작일보다 이전인지 확인
     const startDateObj = new Date(leaveData.startDate);
     const endDateObj = new Date(leaveData.endDate);
@@ -110,8 +133,6 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         alert('오류 : 종료일이 시작일 이전입니다');
         return;
     }
-
-    const leaveDaysNum = parseFloat(leaveData.leaveDays);
 
     // 2. 휴가일수에 따른 날짜 검증
     // 1일 초과인 경우 종료일은 시작일 이후여야 함
