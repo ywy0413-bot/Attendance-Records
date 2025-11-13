@@ -53,7 +53,29 @@
                         </div>
                         <div class="form-group">
                             <label for="outlookLeaveDays">휴가 일수 *</label>
-                            <input type="number" id="outlookLeaveDays" step="0.25" min="0.25" placeholder="예: 0.5" required>
+                            <select id="outlookLeaveDays" required>
+                                <option value="">선택하세요</option>
+                                <option value="0.25">0.25일</option>
+                                <option value="0.5">0.5일</option>
+                                <option value="0.75">0.75일</option>
+                                <option value="1.0">1.0일</option>
+                                <option value="1.25">1.25일</option>
+                                <option value="1.5">1.5일</option>
+                                <option value="1.75">1.75일</option>
+                                <option value="2.0">2.0일</option>
+                                <option value="2.25">2.25일</option>
+                                <option value="2.5">2.5일</option>
+                                <option value="2.75">2.75일</option>
+                                <option value="3.0">3.0일</option>
+                                <option value="3.25">3.25일</option>
+                                <option value="3.5">3.5일</option>
+                                <option value="3.75">3.75일</option>
+                                <option value="4.0">4.0일</option>
+                                <option value="4.25">4.25일</option>
+                                <option value="4.5">4.5일</option>
+                                <option value="4.75">4.75일</option>
+                                <option value="5.0">5.0일</option>
+                            </select>
                         </div>
                         <button onclick="addOutlookLeaveRecord()" class="btn-primary">추가</button>
                     </div>
@@ -91,8 +113,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <script src="firebase-config.js?v=20250115"></script>
-    <script src="auth.js?v=20250115"></script>
-    <script src="leave-stats.js?v=20250115"></script>
+    <script src="firebase-config.js?v=20250116"></script>
+    <script src="auth.js?v=20250116"></script>
+    <script src="leave-stats.js?v=20250116"></script>
 </body>
 </html>

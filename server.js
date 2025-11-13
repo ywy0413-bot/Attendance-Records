@@ -110,7 +110,7 @@ app.post('/api/leave', async (req, res) => {
                 <span class="value">${reporterEnglishName}</span>
             </div>
             <div class="info-row">
-                <span class="label">2. 휴가 일수:</span>
+                <span class="label">2. 휴가일수:</span>
                 <span class="value">${leaveDays}일</span>
             </div>
             <div class="info-row">
@@ -120,10 +120,6 @@ app.post('/api/leave', async (req, res) => {
             <div class="info-row">
                 <span class="label">4. 시간:</span>
                 <span class="value">${timeDisplay}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">신고 일시:</span>
-                <span class="value">${new Date().toLocaleString('ko-KR')}</span>
             </div>
         </div>
         <div class="footer">
@@ -221,7 +217,7 @@ app.post('/api/attendance', async (req, res) => {
                 <span class="value">${reporterEnglishName}</span>
             </div>
             <div class="info-row">
-                <span class="label">2. 근태 내용:</span>
+                <span class="label">2. 근태공유:</span>
                 <span class="value">${attendanceType}</span>
             </div>
             <div class="info-row">
