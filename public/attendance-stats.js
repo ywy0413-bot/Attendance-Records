@@ -12,6 +12,13 @@ let currentCumulativeMinutes = 0; // 현재 누계 시간 (분)
 // 페이지 로드 시 근태 데이터 불러오기
 loadAttendanceStats();
 
+// 사용일자 기본값을 오늘로 설정
+const todayDate = new Date().toISOString().split('T')[0];
+const outlookDateInput = document.getElementById('outlookDate');
+if (outlookDateInput) {
+    outlookDateInput.value = todayDate;
+}
+
 // 근태 통계 데이터 불러오기
 async function loadAttendanceStats() {
     try {
@@ -219,24 +226,6 @@ function updateSummary(totalCount, typeCount, totalMinutes = 0) {
     // 전역 변수 업데이트
     currentCumulativeMinutes = totalMinutes;
 
-    // totalCount 요소가 있으면 업데이트 (제거되었을 수 있음)
-    const totalCountElement = document.getElementById('totalCount');
-    if (totalCountElement) {
-        totalCountElement.textContent = `${totalCount}건`;
-    }
-
-    // 5가지 근태 유형 모두 표시 (0건이어도) - 2열 그리드로 표시
-    const types = ['외출', '출근지연', '조기퇴근', '당직', '전일 야근'];
-    const typeBreakdownHTML = `
-        <div class="type-grid">
-            ${types.map(type => `
-                <div class="type-item">${type} ${typeCount[type] || 0}건</div>
-            `).join('')}
-        </div>
-    `;
-
-    document.getElementById('typeBreakdown').innerHTML = typeBreakdownHTML;
-
     // 누계 시간 표시 (시간과 분으로 변환)
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
@@ -326,6 +315,7 @@ async function deductVacation() {
 // Outlook 신고 추가
 async function addOutlookRecord() {
     const outlookType = document.getElementById('outlookType').value;
+    const outlookDate = document.getElementById('outlookDate').value;
     const outlookMinutes = parseInt(document.getElementById('outlookMinutes').value);
 
     // 입력값 검증
@@ -334,13 +324,18 @@ async function addOutlookRecord() {
         return;
     }
 
+    if (!outlookDate) {
+        alert('사용일자를 선택해주세요.');
+        return;
+    }
+
     if (!outlookMinutes || outlookMinutes <= 0) {
         alert('소요시간을 입력해주세요.');
         return;
     }
 
-    if (outlookMinutes > 480) {
-        alert('소요시간은 480분(8시간)을 초과할 수 없습니다.');
+    if (outlookMinutes >= 120) {
+        alert('아웃룩 신고 추가는 120분 미만만 추가 가능합니다');
         return;
     }
 
@@ -349,8 +344,7 @@ async function addOutlookRecord() {
     }
 
     try {
-        // 현재 시간 기준으로 시작/종료 시간 생성 (오늘 날짜)
-        const now = new Date();
+        // 시작/종료 시간 생성
         const startHour = 9; // 기본 시작 시간 09:00
         const startMinute = 0;
         const endHour = Math.floor((startMinute + outlookMinutes) / 60) + startHour;
@@ -365,7 +359,7 @@ async function addOutlookRecord() {
             reporterName: currentUser.email,
             reporterEnglishName: currentUser.email,
             attendanceType: outlookType,
-            date: now.toISOString().split('T')[0],
+            date: outlookDate,
             startTime: startTime,
             endTime: endTime,
             reason: '직접입력',
@@ -382,6 +376,7 @@ async function addOutlookRecord() {
 
         // 입력 필드 초기화
         document.getElementById('outlookType').value = '';
+        document.getElementById('outlookDate').value = '';
         document.getElementById('outlookMinutes').value = '';
 
         // 데이터 다시 불러오기
