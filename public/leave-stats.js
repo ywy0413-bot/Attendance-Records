@@ -36,20 +36,16 @@ async function loadLeaveStats() {
             }
         });
 
-        // 최신순으로 정렬 (신고일 기준)
+        // 최신순으로 정렬 (사용일 기준)
         allLeaveRecords.sort((a, b) => {
-            if (!a.createdAt) return 1;
-            if (!b.createdAt) return -1;
+            if (!a.startDate) return 1;
+            if (!b.startDate) return -1;
 
             try {
-                const aTime = typeof a.createdAt.toMillis === 'function'
-                    ? a.createdAt.toMillis()
-                    : new Date(a.createdAt).getTime();
-                const bTime = typeof b.createdAt.toMillis === 'function'
-                    ? b.createdAt.toMillis()
-                    : new Date(b.createdAt).getTime();
+                const aDate = new Date(a.startDate);
+                const bDate = new Date(b.startDate);
 
-                return bTime - aTime;
+                return bDate - aDate;
             } catch (error) {
                 console.error('정렬 오류:', error);
                 return 0;
@@ -246,15 +242,7 @@ async function addOutlookLeaveRecord() {
     }
 
     try {
-        // 시작/종료 시간 계산 (0.25일 = 2시간, 0.5일 = 4시간, 0.75일 = 6시간, 1.0일 = 8시간)
-        const hours = Math.floor(leaveDays * 8);
-        const startHour = 9;
-        const endHour = startHour + hours;
-
-        const startTime = `${String(startHour).padStart(2, '0')}:00`;
-        const endTime = `${String(endHour).padStart(2, '0')}:00`;
-
-        // Outlook 휴가 기록 생성
+        // Outlook 휴가 기록 생성 (종료일, 시작시간, 종료시간은 입력하지 않음)
         const outlookData = {
             reporter: currentUser.email,
             reporterName: currentUser.email,
@@ -262,9 +250,9 @@ async function addOutlookLeaveRecord() {
             leaveType: leaveType,
             leaveDays: leaveDays.toString(),
             startDate: leaveStartDate,
-            endDate: leaveStartDate,
-            startTime: startTime,
-            endTime: endTime,
+            endDate: '-',
+            startTime: '-',
+            endTime: '-',
             reason: 'Outlook 신고',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             isOutlookRecord: true
