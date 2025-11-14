@@ -62,6 +62,7 @@ app.post('/api/login', async (req, res) => {
 
 // 휴가 신고 API
 app.post('/api/leave', async (req, res) => {
+    console.log('▶ 휴가 신고 API 요청 수신');
     try {
         const {
             reporter,
@@ -141,9 +142,12 @@ app.post('/api/leave', async (req, res) => {
             html: emailBody
         };
 
-        console.log('이메일 발송 시도 중...');
+        console.log('=== 휴가신고 이메일 발송 시도 ===');
+        console.log('FROM:', FROM_EMAIL);
+        console.log('TO:', TO_EMAIL);
+        console.log('SUBJECT:', emailSubject);
         await sgMail.send(msg);
-        console.log('이메일 발송 성공');
+        console.log('✓ 휴가신고 이메일 발송 성공');
 
         res.status(200).json({
             success: true,
@@ -151,9 +155,11 @@ app.post('/api/leave', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('휴가 신고 처리 중 오류:', error);
+        console.error('✗ 휴가 신고 처리 중 오류:', error);
+        console.error('에러 메시지:', error.message);
         if (error.response) {
-            console.error('SendGrid 에러:', error.response.body);
+            console.error('SendGrid 에러 상태:', error.response.statusCode);
+            console.error('SendGrid 에러 응답:', JSON.stringify(error.response.body, null, 2));
         }
         res.status(500).json({
             success: false,
@@ -164,6 +170,7 @@ app.post('/api/leave', async (req, res) => {
 
 // 근태 신고 API
 app.post('/api/attendance', async (req, res) => {
+    console.log('▶ 근태 신고 API 요청 수신');
     try {
         const {
             reporter,
@@ -252,9 +259,12 @@ app.post('/api/attendance', async (req, res) => {
             html: emailBody
         };
 
-        console.log('이메일 발송 시도 중...');
+        console.log('=== 근태신고 이메일 발송 시도 ===');
+        console.log('FROM:', FROM_EMAIL);
+        console.log('TO:', TO_EMAIL);
+        console.log('SUBJECT:', emailSubject);
         await sgMail.send(msg);
-        console.log('이메일 발송 성공');
+        console.log('✓ 근태신고 이메일 발송 성공');
 
         res.status(200).json({
             success: true,
@@ -262,9 +272,11 @@ app.post('/api/attendance', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('근태 신고 처리 중 오류:', error);
+        console.error('✗ 근태 신고 처리 중 오류:', error);
+        console.error('에러 메시지:', error.message);
         if (error.response) {
-            console.error('SendGrid 에러:', error.response.body);
+            console.error('SendGrid 에러 상태:', error.response.statusCode);
+            console.error('SendGrid 에러 응답:', JSON.stringify(error.response.body, null, 2));
         }
         res.status(500).json({
             success: false,
