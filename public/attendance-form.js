@@ -135,8 +135,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
                 alert('120분 미만으로만 사용이 가능합니다.');
                 return;
             }
-        } else if (attendanceType === '당직') {
-            // 당직은 120분 이하
+        } else if (attendanceType === '당직휴식') {
+            // 당직휴식은 120분 이하
             if (diffMinutes > 120) {
                 alert('120분 이하로만 사용이 가능합니다.');
                 return;

@@ -119,6 +119,7 @@ function updateTimeSelectOptions() {
     const startTimeGroup = document.getElementById('startTimeGroup');
     const endTimeGroup = document.getElementById('endTimeGroup');
     const leaveDaysSelect = document.getElementById('leaveDays');
+    const reasonTextarea = document.getElementById('reason');
 
     // 기존 옵션 제거
     timeSelect.innerHTML = '<option value="">선택하세요</option>';
@@ -132,6 +133,18 @@ function updateTimeSelectOptions() {
         leaveDaysSelect.value = '0.75';
     } else if (leaveType === '전일휴가') {
         leaveDaysSelect.value = '1';
+    } else if (leaveType === '경조휴가') {
+        // 경조휴가는 기본값으로 "선택하세요" 유지
+        leaveDaysSelect.value = '';
+    }
+
+    // 경조휴가 선택 시 사유를 필수로 설정
+    if (leaveType === '경조휴가') {
+        reasonTextarea.required = true;
+        reasonTextarea.parentElement.querySelector('label').innerHTML = '사유 및 특이사항 *';
+    } else {
+        reasonTextarea.required = false;
+        reasonTextarea.parentElement.querySelector('label').innerHTML = '사유 및 특이사항';
     }
 
     if (leaveType === '전일휴가') {
@@ -157,9 +170,21 @@ function updateTimeSelectOptions() {
             timeSelect.appendChild(optionElement);
         });
 
-        // 직접입력 입력란은 초기에 숨김
-        startTimeGroup.style.display = 'none';
-        endTimeGroup.style.display = 'none';
+        // 경조휴가는 직접입력을 기본값으로 설정
+        if (leaveType === '경조휴가') {
+            timeSelect.value = '직접입력';
+            // 직접입력 입력란 표시
+            startTimeGroup.style.display = 'block';
+            endTimeGroup.style.display = 'block';
+            document.getElementById('startHour').required = true;
+            document.getElementById('startMinute').required = true;
+            document.getElementById('endHour').required = true;
+            document.getElementById('endMinute').required = true;
+        } else {
+            // 직접입력 입력란은 초기에 숨김
+            startTimeGroup.style.display = 'none';
+            endTimeGroup.style.display = 'none';
+        }
     } else {
         // 휴가 종류 미선택 시 모두 숨김
         timeSelectGroup.style.display = 'none';
@@ -374,6 +399,10 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     const timeRow = leaveType === '전일휴가' ? '' : `
 4. 시간: ${leaveData.startTime} ~ ${leaveData.endTime}`;
 
+    // 사유 항목 (사유가 있을 경우에만 표시)
+    const reasonRow = leaveData.reason ? `
+5. 사유 및 특이사항: ${leaveData.reason}` : '';
+
     // 이메일 제목
     const emailSubject = `[휴가신고] ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
 
@@ -382,7 +411,7 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
 
 1. 신고자: ${leaveData.reporterEnglishName}
 2. 휴가 일수: ${leaveData.leaveDays}일
-3. 일자: ${dateDisplay}${timeRow}
+3. 일자: ${dateDisplay}${timeRow}${reasonRow}
 
 이메일로 발송됩니다.`;
 

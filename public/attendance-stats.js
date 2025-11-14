@@ -163,8 +163,8 @@ function displayStats(records) {
         if (record.isDeduction && record.deductionMinutes) {
             totalMinutes -= record.deductionMinutes;
         }
-        // 당직과 전일 야근 제외하고 시간 계산
-        else if (type !== '당직' && type !== '전일 야근' && record.startTime && record.endTime) {
+        // 당직휴식과 전일 야근 제외하고 시간 계산
+        else if (type !== '당직휴식' && type !== '전일 야근' && record.startTime && record.endTime) {
             try {
                 const [startH, startM] = record.startTime.split(':').map(Number);
                 const [endH, endM] = record.endTime.split(':').map(Number);
