@@ -77,13 +77,17 @@ app.post('/api/leave', async (req, res) => {
             reason
         } = req.body;
 
-        // 시간 표시 형식
-        const timeDisplay = `${startTime} ~ ${endTime}`;
-
         // 일자 표시 형식
         const dateDisplay = startDate === endDate
             ? startDate
             : `${startDate} ~ ${endDate}`;
+
+        // 시간 항목 (전일휴가는 제외)
+        const timeRow = leaveType === '전일휴가' ? '' : `
+            <div class="info-row">
+                <span class="label">4. 시간:</span>
+                <span class="value">${startTime} ~ ${endTime}</span>
+            </div>`;
 
         // 이메일 제목 생성: [휴가신고] EnglishName(StartDate, LeaveType, LeaveDays)
         const emailSubject = `[휴가신고] ${reporterEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
@@ -117,11 +121,7 @@ app.post('/api/leave', async (req, res) => {
             <div class="info-row">
                 <span class="label">3. 일자:</span>
                 <span class="value">${dateDisplay}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">4. 시간:</span>
-                <span class="value">${timeDisplay}</span>
-            </div>
+            </div>${timeRow}
         </div>
         <div class="footer">
             <p>본 메일은 휴가 신고 시스템에서 자동으로 발송된 메일입니다.</p>

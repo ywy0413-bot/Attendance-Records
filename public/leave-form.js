@@ -86,8 +86,8 @@ generateTimeOptions();
 // 휴가 종류에 따라 시간 입력란 표시/숨김
 function toggleTimeFields() {
     const leaveType = document.getElementById('leaveType').value;
-    const startTimeGroup = document.querySelectorAll('.form-group')[4]; // 시작 시간
-    const endTimeGroup = document.querySelectorAll('.form-group')[5]; // 종료 시간
+    const startTimeGroup = document.getElementById('startTimeGroup');
+    const endTimeGroup = document.getElementById('endTimeGroup');
 
     if (leaveType === '전일휴가') {
         // 전일휴가는 시간 입력란 숨김
@@ -151,11 +151,11 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     // 휴가 종류
     const leaveType = document.getElementById('leaveType').value;
 
-    // 시간 조합 (전일휴가는 기본값 사용)
+    // 시간 조합 (전일휴가는 시간 입력 없음)
     let startTime, endTime;
     if (leaveType === '전일휴가') {
-        startTime = '09:00';
-        endTime = '18:00';
+        startTime = '';
+        endTime = '';
     } else {
         const startHour = document.getElementById('startHour').value;
         const startMinute = document.getElementById('startMinute').value;
@@ -212,7 +212,7 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     if (leaveData.leaveType === '전일휴가') {
         const workingDays = calculateWorkingDays(leaveData.startDate, leaveData.endDate);
         if (workingDays > leaveDaysNum) {
-            alert(`시작일부터 종료일까지의 근무일수(${workingDays}일)가 휴가일수(${leaveDaysNum}일)를 초과합니다.\n주말과 공휴일을 제외한 근무일수를 확인해주세요.`);
+            alert('휴가 기간이 휴가 일수와 일치하지 않습니다');
             return;
         }
     }
