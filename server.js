@@ -89,11 +89,11 @@ app.post('/api/leave', async (req, res) => {
                 <span class="value">${startTime} ~ ${endTime}</span>
             </div>`;
 
-        // 사유 항목 (사유가 있을 경우에만 표시)
+        // 공유사항 항목 (공유사항이 있을 경우에만 표시)
         const reasonRow = reason ? `
-            <div class="info-row">
-                <span class="label">5. 사유 및 특이사항:</span>
-                <span class="value">${reason}</span>
+            <div class="info-row" style="background: #fff9e6; border-left: 3px solid #667eea; padding: 15px;">
+                <div style="font-weight: bold; color: #667eea; margin-bottom: 8px;">* 공유사항</div>
+                <div style="color: #333; white-space: pre-wrap;">${reason}</div>
             </div>` : '';
 
         // 이메일 제목 생성: [휴가신고] EnglishName(StartDate, LeaveType, LeaveDays)

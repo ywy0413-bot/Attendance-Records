@@ -138,13 +138,13 @@ function updateTimeSelectOptions() {
         leaveDaysSelect.value = '';
     }
 
-    // 경조휴가 선택 시 사유를 필수로 설정
+    // 경조휴가 선택 시 공유사항을 필수로 설정
     if (leaveType === '경조휴가') {
         reasonTextarea.required = true;
-        reasonTextarea.parentElement.querySelector('label').innerHTML = '사유 및 특이사항 *';
+        reasonTextarea.parentElement.querySelector('label').innerHTML = '공유사항 *';
     } else {
         reasonTextarea.required = false;
-        reasonTextarea.parentElement.querySelector('label').innerHTML = '사유 및 특이사항';
+        reasonTextarea.parentElement.querySelector('label').innerHTML = '공유사항';
     }
 
     if (leaveType === '전일휴가') {
@@ -399,9 +399,11 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     const timeRow = leaveType === '전일휴가' ? '' : `
 4. 시간: ${leaveData.startTime} ~ ${leaveData.endTime}`;
 
-    // 사유 항목 (사유가 있을 경우에만 표시)
+    // 공유사항 항목 (공유사항이 있을 경우에만 표시)
     const reasonRow = leaveData.reason ? `
-5. 사유 및 특이사항: ${leaveData.reason}` : '';
+
+* 공유사항
+${leaveData.reason}` : '';
 
     // 이메일 제목
     const emailSubject = `[휴가신고] ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
