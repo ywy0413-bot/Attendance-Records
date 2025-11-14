@@ -845,3 +845,22 @@ footer {
         grid-column: 1;
     }
 }
+
+/* Flatpickr 공휴일 스타일 */
+.flatpickr-day.holiday {
+    background-color: #ffe6e6 !important;
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+.flatpickr-day.holiday:hover {
+    background-color: #ffcccc !important;
+    color: #d32f2f !important;
+}
+
+.flatpickr-day.holiday.selected,
+.flatpickr-day.holiday.startRange,
+.flatpickr-day.holiday.endRange {
+    background-color: #d32f2f !important;
+    color: white !important;
+}

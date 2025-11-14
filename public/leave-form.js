@@ -42,22 +42,25 @@ function calculateWorkingDays(startDateStr, endDateStr) {
     return workingDays;
 }
 
-// 시간/분 옵션 생성 (시간: 08~18, 분: 10분 단위)
+// 시간/분 옵션 생성 (시작: 08~17, 종료: 08~18, 분: 10분 단위)
 function generateTimeOptions() {
     const startHourSelect = document.getElementById('startHour');
     const startMinuteSelect = document.getElementById('startMinute');
     const endHourSelect = document.getElementById('endHour');
     const endMinuteSelect = document.getElementById('endMinute');
 
-    // 시간 옵션 생성 (08 ~ 18)
-    for (let hour = 8; hour <= 18; hour++) {
+    // 시작 시간 옵션 생성 (08 ~ 17)
+    for (let hour = 8; hour <= 17; hour++) {
         const hourValue = String(hour).padStart(2, '0');
-
         const startHourOption = document.createElement('option');
         startHourOption.value = hourValue;
         startHourOption.textContent = hourValue;
         startHourSelect.appendChild(startHourOption);
+    }
 
+    // 종료 시간 옵션 생성 (08 ~ 18)
+    for (let hour = 8; hour <= 18; hour++) {
+        const hourValue = String(hour).padStart(2, '0');
         const endHourOption = document.createElement('option');
         endHourOption.value = hourValue;
         endHourOption.textContent = hourValue;
@@ -479,5 +482,30 @@ ${leaveData.reason}` : '';
 
 // 오늘 날짜를 기본값으로 설정
 const today = new Date().toISOString().split('T')[0];
-document.getElementById('startDate').value = today;
-document.getElementById('endDate').value = today;
+
+// Flatpickr로 달력 초기화 (공휴일 표시)
+flatpickr("#startDate", {
+    locale: "ko",
+    dateFormat: "Y-m-d",
+    defaultDate: today,
+    onDayCreate: function(dObj, dStr, fp, dayElem) {
+        const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+        // 공휴일 체크
+        if (holidays2025.includes(dateStr)) {
+            dayElem.classList.add('holiday');
+        }
+    }
+});
+
+flatpickr("#endDate", {
+    locale: "ko",
+    dateFormat: "Y-m-d",
+    defaultDate: today,
+    onDayCreate: function(dObj, dStr, fp, dayElem) {
+        const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+        // 공휴일 체크
+        if (holidays2025.includes(dateStr)) {
+            dayElem.classList.add('holiday');
+        }
+    }
+});

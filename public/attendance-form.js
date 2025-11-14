@@ -1,22 +1,40 @@
 // 버전 확인 로그
 console.log('Attendance Form Version: 2024-11-12-v2');
 
-// 시간/분 옵션 생성
+// 2025년 한국 공휴일 (YYYY-MM-DD 형식)
+const holidays2025 = [
+    '2025-01-01', // 신정
+    '2025-01-28', '2025-01-29', '2025-01-30', // 설날 연휴
+    '2025-03-01', // 삼일절
+    '2025-05-05', // 어린이날
+    '2025-05-06', // 대체공휴일
+    '2025-06-06', // 현충일
+    '2025-08-15', // 광복절
+    '2025-10-03', // 개천절
+    '2025-10-06', '2025-10-07', '2025-10-08', // 추석 연휴
+    '2025-10-09', // 한글날
+    '2025-12-25'  // 성탄절
+];
+
+// 시간/분 옵션 생성 (시작: 08~17, 종료: 08~18)
 function generateTimeOptions() {
     const startHourSelect = document.getElementById('startHour');
     const startMinuteSelect = document.getElementById('startMinute');
     const endHourSelect = document.getElementById('endHour');
     const endMinuteSelect = document.getElementById('endMinute');
 
-    // 시간 옵션 생성 (08 ~ 18)
-    for (let hour = 8; hour <= 18; hour++) {
+    // 시작 시간 옵션 생성 (08 ~ 17)
+    for (let hour = 8; hour <= 17; hour++) {
         const hourValue = String(hour).padStart(2, '0');
-
         const startHourOption = document.createElement('option');
         startHourOption.value = hourValue;
         startHourOption.textContent = hourValue;
         startHourSelect.appendChild(startHourOption);
+    }
 
+    // 종료 시간 옵션 생성 (08 ~ 18)
+    for (let hour = 8; hour <= 18; hour++) {
+        const hourValue = String(hour).padStart(2, '0');
         const endHourOption = document.createElement('option');
         endHourOption.value = hourValue;
         endHourOption.textContent = hourValue;
@@ -227,4 +245,17 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
 // 오늘 날짜를 기본값으로 설정
 const today = new Date().toISOString().split('T')[0];
-document.getElementById('date').value = today;
+
+// Flatpickr로 달력 초기화 (공휴일 표시)
+flatpickr("#date", {
+    locale: "ko",
+    dateFormat: "Y-m-d",
+    defaultDate: today,
+    onDayCreate: function(dObj, dStr, fp, dayElem) {
+        const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+        // 공휴일 체크
+        if (holidays2025.includes(dateStr)) {
+            dayElem.classList.add('holiday');
+        }
+    }
+});
