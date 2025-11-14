@@ -126,14 +126,23 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
             return;
         }
 
-        // 120분 초과 검증 (전일 야근은 예외)
-        if (diffMinutes > 120 && attendanceData.attendanceType !== '전일 야근') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = 'message error';
-            messageDiv.textContent = '근태 신고는 120분 이하로만 사용 가능합니다.';
-            messageDiv.style.display = 'block';
-            return;
+        // 근태 종류별 시간 제한 검증
+        const attendanceType = attendanceData.attendanceType;
+
+        if (attendanceType === '출근지연' || attendanceType === '조기퇴근' || attendanceType === '외출') {
+            // 출근지연, 조기퇴근, 외출은 120분 미만
+            if (diffMinutes >= 120) {
+                alert('120분 미만으로만 사용이 가능합니다.');
+                return;
+            }
+        } else if (attendanceType === '당직') {
+            // 당직은 120분 이하
+            if (diffMinutes > 120) {
+                alert('120분 이하로만 사용이 가능합니다.');
+                return;
+            }
         }
+        // 전일 야근은 시간 제한 없음
 
         // 분 단위로만 표시
         timeDuration = `(${diffMinutes}분)`;
