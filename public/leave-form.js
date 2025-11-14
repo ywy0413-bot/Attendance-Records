@@ -118,9 +118,21 @@ function updateTimeSelectOptions() {
     const timeSelectGroup = document.getElementById('timeSelectGroup');
     const startTimeGroup = document.getElementById('startTimeGroup');
     const endTimeGroup = document.getElementById('endTimeGroup');
+    const leaveDaysSelect = document.getElementById('leaveDays');
 
     // 기존 옵션 제거
     timeSelect.innerHTML = '<option value="">선택하세요</option>';
+
+    // 휴가 종류에 따라 휴가일수 자동 선택
+    if (leaveType === '반차휴가') {
+        leaveDaysSelect.value = '0.5';
+    } else if (leaveType === '반반차휴가') {
+        leaveDaysSelect.value = '0.25';
+    } else if (leaveType === '반차휴가 + 반반차 휴가') {
+        leaveDaysSelect.value = '0.75';
+    } else if (leaveType === '전일휴가') {
+        leaveDaysSelect.value = '1';
+    }
 
     if (leaveType === '전일휴가') {
         // 전일휴가는 시간 선택/입력란 모두 숨김
