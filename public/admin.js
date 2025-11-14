@@ -158,6 +158,7 @@ function displayUsers(users) {
                 <td>${createdDate}</td>
                 <td>
                     <button onclick="editUser('${user.id}')" class="btn-edit">수정</button>
+                    <button onclick="resetUserData('${user.id}', '${user.name}')" class="btn-warning">데이터 초기화</button>
                     <button onclick="deleteUser('${user.id}')" class="btn-delete">삭제</button>
                 </td>
             </tr>
@@ -425,4 +426,60 @@ function parseCSVLine(line) {
 
     result.push(current);
     return result.map(cell => cell.replace(/^"|"$/g, '').trim());
+}
+
+// 사용자 데이터 초기화 (휴가/근태 기록 삭제)
+async function resetUserData(userId, userName) {
+    const confirmMessage = `"${userName} (${userId})" 사용자의 모든 휴가 및 근태 기록을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`;
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    const messageDiv = document.getElementById('message');
+    messageDiv.className = 'message';
+    messageDiv.textContent = '데이터 초기화 중...';
+    messageDiv.style.display = 'block';
+
+    try {
+        let deletedLeaveCount = 0;
+        let deletedAttendanceCount = 0;
+
+        // 1. 휴가 기록 삭제
+        const leaveSnapshot = await leaveRecordsCollection.where('reporter', '==', userId).get();
+
+        if (!leaveSnapshot.empty) {
+            const batch1 = firebase.firestore().batch();
+            leaveSnapshot.forEach(doc => {
+                batch1.delete(doc.ref);
+                deletedLeaveCount++;
+            });
+            await batch1.commit();
+        }
+
+        // 2. 근태 기록 삭제
+        const attendanceSnapshot = await attendanceRecordsCollection.where('reporter', '==', userId).get();
+
+        if (!attendanceSnapshot.empty) {
+            const batch2 = firebase.firestore().batch();
+            attendanceSnapshot.forEach(doc => {
+                batch2.delete(doc.ref);
+                deletedAttendanceCount++;
+            });
+            await batch2.commit();
+        }
+
+        // 성공 메시지
+        messageDiv.className = 'message success';
+        messageDiv.textContent = `데이터 초기화 완료\n- 휴가 기록: ${deletedLeaveCount}건 삭제\n- 근태 기록: ${deletedAttendanceCount}건 삭제`;
+
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+
+    } catch (error) {
+        console.error('데이터 초기화 오류:', error);
+        messageDiv.className = 'message error';
+        messageDiv.textContent = '데이터 초기화 중 오류가 발생했습니다: ' + error.message;
+    }
 }
