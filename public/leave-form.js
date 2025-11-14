@@ -211,7 +211,9 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     // 0-1. Working days 검증 (전일휴가만 해당)
     if (leaveData.leaveType === '전일휴가') {
         const workingDays = calculateWorkingDays(leaveData.startDate, leaveData.endDate);
-        if (workingDays > leaveDaysNum) {
+        const diff = Math.abs(workingDays - leaveDaysNum);
+        // 차이가 1.0일 이상이면 경고
+        if (diff >= 1.0) {
             alert('휴가 기간이 휴가 일수와 일치하지 않습니다');
             return;
         }
@@ -263,13 +265,14 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         }
     }
 
-    // 시간 표시 형식
-    const timeDisplay = `${leaveData.startTime} ~ ${leaveData.endTime}`;
-
     // 일자 표시 형식
     const dateDisplay = leaveData.startDate === leaveData.endDate
         ? leaveData.startDate
         : `${leaveData.startDate} ~ ${leaveData.endDate}`;
+
+    // 시간 항목 (전일휴가는 제외)
+    const timeRow = leaveType === '전일휴가' ? '' : `
+4. 시간: ${leaveData.startTime} ~ ${leaveData.endTime}`;
 
     // 이메일 제목
     const emailSubject = `[휴가신고] ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
@@ -279,8 +282,7 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
 
 1. 신고자: ${leaveData.reporterEnglishName}
 2. 휴가 일수: ${leaveData.leaveDays}일
-3. 일자: ${dateDisplay}
-4. 시간: ${timeDisplay}
+3. 일자: ${dateDisplay}${timeRow}
 
 이메일로 발송됩니다.`;
 
