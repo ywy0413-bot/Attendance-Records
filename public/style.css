@@ -779,6 +779,10 @@ footer {
     grid-column: 1;
 }
 
+.outlook-form .form-group:nth-child(4) {
+    grid-column: 2;
+}
+
 .outlook-form label {
     margin-bottom: 4px;
     color: #333;
@@ -803,7 +807,7 @@ footer {
 }
 
 .outlook-form .btn-primary {
-    grid-column: 2;
+    width: 100%;
     padding: 6px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -814,8 +818,6 @@ footer {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.3s;
     white-space: nowrap;
-    align-self: flex-end;
-    height: fit-content;
 }
 
 .outlook-form .btn-primary:hover {
@@ -838,12 +840,8 @@ footer {
         gap: 10px;
     }
 
-    .outlook-form .form-group:nth-child(3) {
+    .outlook-form .form-group:nth-child(3),
+    .outlook-form .form-group:nth-child(4) {
         grid-column: 1;
-    }
-
-    .outlook-form .btn-primary {
-        grid-column: 1;
-        width: 100%;
     }
 }
