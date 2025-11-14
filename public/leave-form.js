@@ -83,35 +83,109 @@ function generateTimeOptions() {
 // 페이지 로드 시 시간 옵션 생성
 generateTimeOptions();
 
-// 휴가 종류에 따라 시간 입력란 표시/숨김
-function toggleTimeFields() {
+// 휴가 종류별 시간 옵션
+const timeOptions = {
+    '반차휴가': [
+        '08:00 ~ 13:00',
+        '09:00 ~ 14:00',
+        '13:00 ~ 17:00',
+        '14:00 ~ 18:00',
+        '11:00 ~ 16:00',
+        '12:00 ~ 17:00',
+        '직접입력'
+    ],
+    '반반차휴가': [
+        '08:00 ~ 10:00',
+        '09:00 ~ 11:00',
+        '15:00 ~ 17:00',
+        '16:00 ~ 18:00',
+        '14:00 ~ 16:00',
+        '15:00 ~ 17:00',
+        '직접입력'
+    ],
+    '반차휴가 + 반반차 휴가': [
+        '직접입력'
+    ],
+    '경조휴가': [
+        '직접입력'
+    ]
+};
+
+// 휴가 종류에 따라 시간 선택 드롭다운 옵션 생성
+function updateTimeSelectOptions() {
     const leaveType = document.getElementById('leaveType').value;
+    const timeSelect = document.getElementById('timeSelect');
+    const timeSelectGroup = document.getElementById('timeSelectGroup');
     const startTimeGroup = document.getElementById('startTimeGroup');
     const endTimeGroup = document.getElementById('endTimeGroup');
 
+    // 기존 옵션 제거
+    timeSelect.innerHTML = '<option value="">선택하세요</option>';
+
     if (leaveType === '전일휴가') {
-        // 전일휴가는 시간 입력란 숨김
+        // 전일휴가는 시간 선택/입력란 모두 숨김
+        timeSelectGroup.style.display = 'none';
         startTimeGroup.style.display = 'none';
         endTimeGroup.style.display = 'none';
-        // required 해제
+        timeSelect.required = false;
         document.getElementById('startHour').required = false;
         document.getElementById('startMinute').required = false;
         document.getElementById('endHour').required = false;
         document.getElementById('endMinute').required = false;
+    } else if (leaveType && timeOptions[leaveType]) {
+        // 시간 선택 드롭다운 표시
+        timeSelectGroup.style.display = 'block';
+        timeSelect.required = true;
+
+        // 옵션 추가
+        timeOptions[leaveType].forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            timeSelect.appendChild(optionElement);
+        });
+
+        // 직접입력 입력란은 초기에 숨김
+        startTimeGroup.style.display = 'none';
+        endTimeGroup.style.display = 'none';
     } else {
-        // 다른 휴가는 시간 입력란 표시
+        // 휴가 종류 미선택 시 모두 숨김
+        timeSelectGroup.style.display = 'none';
+        startTimeGroup.style.display = 'none';
+        endTimeGroup.style.display = 'none';
+    }
+}
+
+// 시간 선택 드롭다운 변경 시 직접입력란 토글
+function toggleDirectTimeInput() {
+    const timeSelect = document.getElementById('timeSelect');
+    const startTimeGroup = document.getElementById('startTimeGroup');
+    const endTimeGroup = document.getElementById('endTimeGroup');
+
+    if (timeSelect.value === '직접입력') {
+        // 직접입력 선택 시 시간 입력란 표시
         startTimeGroup.style.display = 'block';
         endTimeGroup.style.display = 'block';
-        // required 설정
         document.getElementById('startHour').required = true;
         document.getElementById('startMinute').required = true;
         document.getElementById('endHour').required = true;
         document.getElementById('endMinute').required = true;
+    } else {
+        // 다른 옵션 선택 시 시간 입력란 숨김
+        startTimeGroup.style.display = 'none';
+        endTimeGroup.style.display = 'none';
+        document.getElementById('startHour').required = false;
+        document.getElementById('startMinute').required = false;
+        document.getElementById('endHour').required = false;
+        document.getElementById('endMinute').required = false;
     }
 }
 
-// 휴가 종류 변경 시 시간 입력란 토글
-document.getElementById('leaveType').addEventListener('change', toggleTimeFields);
+// 휴가 종류 변경 시 시간 옵션 업데이트
+document.getElementById('leaveType').addEventListener('change', updateTimeSelectOptions);
+
+// 시간 선택 변경 시 직접입력란 토글
+document.getElementById('timeSelect').addEventListener('change', toggleDirectTimeInput);
 
 // 로그인한 사용자 정보 가져오기
 let currentUserData = null;
@@ -151,19 +225,33 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     // 휴가 종류
     const leaveType = document.getElementById('leaveType').value;
 
-    // 시간 조합 (전일휴가는 시간 입력 없음)
+    // 시간 조합
     let startTime, endTime;
     if (leaveType === '전일휴가') {
+        // 전일휴가는 시간 입력 없음
         startTime = '';
         endTime = '';
     } else {
-        const startHour = document.getElementById('startHour').value;
-        const startMinute = document.getElementById('startMinute').value;
-        const endHour = document.getElementById('endHour').value;
-        const endMinute = document.getElementById('endMinute').value;
+        const timeSelect = document.getElementById('timeSelect').value;
 
-        startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
-        endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
+        if (timeSelect === '직접입력') {
+            // 직접입력: 사용자가 입력한 시간 사용
+            const startHour = document.getElementById('startHour').value;
+            const startMinute = document.getElementById('startMinute').value;
+            const endHour = document.getElementById('endHour').value;
+            const endMinute = document.getElementById('endMinute').value;
+
+            startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
+            endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
+        } else if (timeSelect) {
+            // 드롭다운 선택: 선택된 시간 범위 파싱 (예: "08:00 ~ 13:00")
+            const timeParts = timeSelect.split(' ~ ');
+            startTime = timeParts[0];
+            endTime = timeParts[1];
+        } else {
+            startTime = '';
+            endTime = '';
+        }
     }
 
     // 폼 데이터 수집
