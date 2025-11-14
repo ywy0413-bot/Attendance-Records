@@ -1,3 +1,47 @@
+// 2025년 한국 공휴일 (YYYY-MM-DD 형식)
+const holidays2025 = [
+    '2025-01-01', // 신정
+    '2025-01-28', '2025-01-29', '2025-01-30', // 설날 연휴
+    '2025-03-01', // 삼일절
+    '2025-05-05', // 어린이날
+    '2025-05-06', // 대체공휴일
+    '2025-06-06', // 현충일
+    '2025-08-15', // 광복절
+    '2025-10-03', // 개천절
+    '2025-10-06', '2025-10-07', '2025-10-08', // 추석 연휴
+    '2025-10-09', // 한글날
+    '2025-12-25'  // 성탄절
+];
+
+// 주말 또는 공휴일인지 확인
+function isWeekendOrHoliday(dateString) {
+    const date = new Date(dateString);
+    const dayOfWeek = date.getDay();
+    // 0(일요일) 또는 6(토요일)
+    if (dayOfWeek === 0 || dayOfWeek === 6) return true;
+    // 공휴일 체크
+    return holidays2025.includes(dateString);
+}
+
+// 두 날짜 사이의 working days 계산 (시작일과 종료일 포함)
+function calculateWorkingDays(startDateStr, endDateStr) {
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
+    let workingDays = 0;
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        if (!isWeekendOrHoliday(dateStr)) {
+            workingDays++;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return workingDays;
+}
+
 // 시간/분 옵션 생성 (시간: 08~18, 분: 10분 단위)
 function generateTimeOptions() {
     const startHourSelect = document.getElementById('startHour');
@@ -39,6 +83,36 @@ function generateTimeOptions() {
 // 페이지 로드 시 시간 옵션 생성
 generateTimeOptions();
 
+// 휴가 종류에 따라 시간 입력란 표시/숨김
+function toggleTimeFields() {
+    const leaveType = document.getElementById('leaveType').value;
+    const startTimeGroup = document.querySelectorAll('.form-group')[4]; // 시작 시간
+    const endTimeGroup = document.querySelectorAll('.form-group')[5]; // 종료 시간
+
+    if (leaveType === '전일휴가') {
+        // 전일휴가는 시간 입력란 숨김
+        startTimeGroup.style.display = 'none';
+        endTimeGroup.style.display = 'none';
+        // required 해제
+        document.getElementById('startHour').required = false;
+        document.getElementById('startMinute').required = false;
+        document.getElementById('endHour').required = false;
+        document.getElementById('endMinute').required = false;
+    } else {
+        // 다른 휴가는 시간 입력란 표시
+        startTimeGroup.style.display = 'block';
+        endTimeGroup.style.display = 'block';
+        // required 설정
+        document.getElementById('startHour').required = true;
+        document.getElementById('startMinute').required = true;
+        document.getElementById('endHour').required = true;
+        document.getElementById('endMinute').required = true;
+    }
+}
+
+// 휴가 종류 변경 시 시간 입력란 토글
+document.getElementById('leaveType').addEventListener('change', toggleTimeFields);
+
 // 로그인한 사용자 정보 가져오기
 let currentUserData = null;
 async function loadCurrentUser() {
@@ -74,14 +148,23 @@ document.getElementById('leaveDays').addEventListener('change', function() {
 document.getElementById('leaveForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    // 시간 조합
-    const startHour = document.getElementById('startHour').value;
-    const startMinute = document.getElementById('startMinute').value;
-    const endHour = document.getElementById('endHour').value;
-    const endMinute = document.getElementById('endMinute').value;
+    // 휴가 종류
+    const leaveType = document.getElementById('leaveType').value;
 
-    const startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
-    const endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
+    // 시간 조합 (전일휴가는 기본값 사용)
+    let startTime, endTime;
+    if (leaveType === '전일휴가') {
+        startTime = '09:00';
+        endTime = '18:00';
+    } else {
+        const startHour = document.getElementById('startHour').value;
+        const startMinute = document.getElementById('startMinute').value;
+        const endHour = document.getElementById('endHour').value;
+        const endMinute = document.getElementById('endMinute').value;
+
+        startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
+        endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
+    }
 
     // 폼 데이터 수집
     const leaveDays = document.getElementById('leaveDays').value === '기타'
@@ -92,7 +175,7 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
         reporter: currentUser.email,
         reporterName: currentUserData?.name || currentUser.email,
         reporterEnglishName: currentUserData?.englishName || currentUser.email,
-        leaveType: document.getElementById('leaveType').value,
+        leaveType: leaveType,
         leaveDays: leaveDays,
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
@@ -123,6 +206,15 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     if (leaveData.leaveType === '전일휴가' && leaveDaysNum < 1.0) {
         alert('전일휴가는 휴가일수가 1.0일 이상이어야 합니다');
         return;
+    }
+
+    // 0-1. Working days 검증 (전일휴가만 해당)
+    if (leaveData.leaveType === '전일휴가') {
+        const workingDays = calculateWorkingDays(leaveData.startDate, leaveData.endDate);
+        if (workingDays > leaveDaysNum) {
+            alert(`시작일부터 종료일까지의 근무일수(${workingDays}일)가 휴가일수(${leaveDaysNum}일)를 초과합니다.\n주말과 공휴일을 제외한 근무일수를 확인해주세요.`);
+            return;
+        }
     }
 
     // 1. 종료일이 시작일보다 이전인지 확인
