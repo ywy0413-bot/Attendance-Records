@@ -489,7 +489,12 @@ flatpickr("#startDate", {
     dateFormat: "Y-m-d",
     defaultDate: today,
     onDayCreate: function(dObj, dStr, fp, dayElem) {
-        const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+        // 로컬 날짜로 변환 (시간대 문제 방지)
+        const year = dayElem.dateObj.getFullYear();
+        const month = String(dayElem.dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dayElem.dateObj.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
         // 공휴일 체크
         if (holidays2025.includes(dateStr)) {
             dayElem.classList.add('holiday');
@@ -502,7 +507,12 @@ flatpickr("#endDate", {
     dateFormat: "Y-m-d",
     defaultDate: today,
     onDayCreate: function(dObj, dStr, fp, dayElem) {
-        const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+        // 로컬 날짜로 변환 (시간대 문제 방지)
+        const year = dayElem.dateObj.getFullYear();
+        const month = String(dayElem.dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dayElem.dateObj.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
         // 공휴일 체크
         if (holidays2025.includes(dateStr)) {
             dayElem.classList.add('holiday');
