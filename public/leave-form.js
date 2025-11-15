@@ -245,8 +245,8 @@ function updateTimeSelectOptions() {
             timeSelect.appendChild(optionElement);
         });
 
-        // 경조휴가는 직접입력을 기본값으로 설정
-        if (leaveType === '경조휴가') {
+        // 경조휴가와 반차휴가 + 반반차 휴가는 직접입력을 기본값으로 설정
+        if (leaveType === '경조휴가' || leaveType === '반차휴가 + 반반차 휴가') {
             timeSelect.value = '직접입력';
             // 직접입력 입력란 표시
             startTimeGroup.style.display = 'block';
@@ -255,6 +255,10 @@ function updateTimeSelectOptions() {
             document.getElementById('startMinute').required = true;
             document.getElementById('endHour').required = true;
             document.getElementById('endMinute').required = true;
+
+            // 시작시간과 종료시간의 분을 00분으로 설정
+            document.getElementById('startMinute').value = '00';
+            document.getElementById('endMinute').value = '00';
         } else {
             // 직접입력 입력란은 초기에 숨김
             startTimeGroup.style.display = 'none';

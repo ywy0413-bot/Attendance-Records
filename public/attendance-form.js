@@ -171,6 +171,7 @@ document.getElementById('attendanceType').addEventListener('change', function() 
     const attendanceType = this.value;
     const startHourSelect = document.getElementById('startHour');
     const startMinuteSelect = document.getElementById('startMinute');
+    const endHourSelect = document.getElementById('endHour');
     const endMinuteSelect = document.getElementById('endMinute');
 
     if (attendanceType === '출근지연') {
@@ -179,6 +180,10 @@ document.getElementById('attendanceType').addEventListener('change', function() 
         startMinuteSelect.value = '00';
     } else if (attendanceType === '조기퇴근') {
         // 조기퇴근 선택 시 종료시간의 분을 00분으로 설정
+        endMinuteSelect.value = '00';
+    } else if (attendanceType === '당직휴식') {
+        // 당직휴식 선택 시 시작시간과 종료시간의 분을 00분으로 설정
+        startMinuteSelect.value = '00';
         endMinuteSelect.value = '00';
     }
 });
