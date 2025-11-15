@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -21,7 +21,7 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
     padding: 30px;
     text-align: center;
@@ -108,7 +108,7 @@ main {
 .menu-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .card-icon {
@@ -119,7 +119,7 @@ main {
 .menu-card h2 {
     font-size: 20px;
     margin-bottom: 8px;
-    color: #667eea;
+    color: #4A90E2;
 }
 
 .menu-card p {
@@ -162,7 +162,7 @@ main {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .form-group textarea {
@@ -193,7 +193,7 @@ main {
 
 .time-select-small:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .button-group {
@@ -215,13 +215,13 @@ main {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
 }
 
 .btn-secondary {
@@ -332,7 +332,7 @@ footer {
 }
 
 .admin-section h2 {
-    color: #667eea;
+    color: #4A90E2;
     font-size: 20px;
     margin-bottom: 20px;
 }
@@ -358,7 +358,7 @@ footer {
 
 .search-box input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .user-table-container {
@@ -374,7 +374,7 @@ footer {
 }
 
 .user-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
 }
 
@@ -535,7 +535,7 @@ footer {
 
 .filter-section select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .summary-section {
@@ -567,7 +567,7 @@ footer {
 .summary-value {
     font-size: 28px;
     font-weight: 700;
-    color: #667eea;
+    color: #4A90E2;
     margin: 0;
 }
 
@@ -589,7 +589,7 @@ footer {
 .type-item {
     text-align: left;
     font-size: 16px;
-    color: #667eea;
+    color: #4A90E2;
     font-weight: 600;
 }
 
@@ -604,7 +604,7 @@ footer {
 
 .vacation-select {
     padding: 8px 12px;
-    border: 2px solid #667eea;
+    border: 2px solid #4A90E2;
     border-radius: 5px;
     font-size: 16px;
     color: #333;
@@ -616,12 +616,12 @@ footer {
 .vacation-select:hover,
 .vacation-select:focus {
     outline: none;
-    border-color: #764ba2;
+    border-color: #357ABD;
 }
 
 .btn-deduct {
     padding: 8px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
     border: none;
     border-radius: 5px;
@@ -633,7 +633,7 @@ footer {
 
 .btn-deduct:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
 }
 
 .btn-deduct:active {
@@ -656,7 +656,7 @@ footer {
 }
 
 .stats-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
 }
 
@@ -758,7 +758,7 @@ footer {
 
 .outlook-add-section h3 {
     margin: 0 0 10px 0;
-    color: #667eea;
+    color: #4A90E2;
     font-size: 14px;
     font-weight: 600;
 }
@@ -803,13 +803,13 @@ footer {
 .outlook-form select:focus,
 .outlook-form input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4A90E2;
 }
 
 .outlook-form .btn-primary {
     width: 100%;
     padding: 6px 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
     border: none;
     border-radius: 5px;
@@ -822,7 +822,7 @@ footer {
 
 .outlook-form .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
 }
 
 .outlook-form .btn-primary:active {

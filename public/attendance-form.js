@@ -166,6 +166,23 @@ document.getElementById('reasonSelect').addEventListener('change', function() {
     }
 });
 
+// 근태 내용 선택 시 시간 기본값 설정
+document.getElementById('attendanceType').addEventListener('change', function() {
+    const attendanceType = this.value;
+    const startHourSelect = document.getElementById('startHour');
+    const startMinuteSelect = document.getElementById('startMinute');
+    const endMinuteSelect = document.getElementById('endMinute');
+
+    if (attendanceType === '출근지연') {
+        // 출근지연 선택 시 시작 시간을 08:00으로 설정
+        startHourSelect.value = '08';
+        startMinuteSelect.value = '00';
+    } else if (attendanceType === '조기퇴근') {
+        // 조기퇴근 선택 시 종료시간의 분을 00분으로 설정
+        endMinuteSelect.value = '00';
+    }
+});
+
 // 폼 제출 처리
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
     e.preventDefault();
