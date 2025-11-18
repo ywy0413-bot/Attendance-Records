@@ -96,8 +96,9 @@ app.post('/api/leave', async (req, res) => {
                 <div style="color: #333; white-space: pre-wrap;">${reason}</div>
             </div>` : '';
 
-        // 이메일 제목 생성: [휴가신고] EnglishName(StartDate, LeaveType, LeaveDays)
-        const emailSubject = `[휴가신고] ${reporterEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
+        // 이메일 제목 생성 (경조휴가는 별도 제목)
+        const emailTitle = leaveType === '경조휴가' ? '[경조휴가]' : '[휴가신고]';
+        const emailSubject = `${emailTitle} ${reporterEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
         const emailBody = `
 <!DOCTYPE html>
 <html>

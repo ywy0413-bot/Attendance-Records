@@ -484,8 +484,9 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
 * 공유사항
 ${leaveData.reason}` : '';
 
-    // 이메일 제목
-    const emailSubject = `[휴가신고] ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
+    // 이메일 제목 (경조휴가는 별도 제목)
+    const emailTitle = leaveData.leaveType === '경조휴가' ? '[경조휴가]' : '[휴가신고]';
+    const emailSubject = `${emailTitle} ${leaveData.reporterEnglishName}(${leaveData.startDate}, ${leaveData.leaveType}, ${leaveData.leaveDays}일)`;
 
     // 확인 팝업 표시
     const confirmMessage = `${emailSubject}
