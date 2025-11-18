@@ -29,7 +29,12 @@
                             <li>B열: 이름 (예: 홍길동)</li>
                             <li>C열: 영어이름 (예: Hong Gildong)</li>
                             <li>D열: 그룹명 (예: 개발팀)</li>
-                            <li>E열: PIN (4자리 숫자, 예: 1234) - 선택사항</li>
+                            <li>E열: PIN - 선택사항
+                                <ul>
+                                    <li>기업발전그룹: 6자리 영문숫자 (예: 1fbyep)</li>
+                                    <li>기타 그룹: 4자리 숫자 (예: 1234)</li>
+                                </ul>
+                            </li>
                         </ul>
                         <p><small>※ 첫 번째 행이 헤더인 경우 자동으로 건너뜁니다.</small></p>
                         <p><small>※ PIN을 입력하지 않으면 기본값 0000으로 설정됩니다.</small></p>
@@ -73,7 +78,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="newUserPin">PIN (4자리) *</label>
-                            <input type="password" id="newUserPin" name="newUserPin" required maxlength="4" pattern="[0-9]{4}" placeholder="1234">
+                            <input type="text" id="newUserPin" name="newUserPin" required maxlength="4" pattern="[0-9]{4}" placeholder="1234">
                         </div>
                     </div>
 

@@ -15,6 +15,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadUserList();
 });
 
+// 전역 변수로 사용자 목록 저장
+let allUsersData = {};
+
 // 사용자 목록을 Firestore에서 가져와 드롭다운에 채우기
 async function loadUserList() {
     try {
@@ -23,11 +26,14 @@ async function loadUserList() {
 
         snapshot.forEach(doc => {
             const userData = doc.data();
-            users.push({
+            const userInfo = {
                 email: doc.id,
                 name: userData.name,
-                englishName: userData.englishName
-            });
+                englishName: userData.englishName,
+                department: userData.department || ''
+            };
+            users.push(userInfo);
+            allUsersData[doc.id] = userInfo; // 이메일을 키로 저장
         });
 
         // 이름을 가나다 순으로 정렬
@@ -42,12 +48,46 @@ async function loadUserList() {
             userSelect.appendChild(option);
         });
 
+        // 사용자 선택 시 PIN 필드 업데이트
+        userSelect.addEventListener('change', updatePinField);
+
     } catch (error) {
         console.error('사용자 목록 로드 오류:', error);
         const messageDiv = document.getElementById('message');
         messageDiv.className = 'message error';
         messageDiv.textContent = '사용자 목록을 불러오는데 실패했습니다.';
         messageDiv.style.display = 'block';
+    }
+}
+
+// 선택한 사용자에 따라 PIN 필드 업데이트
+function updatePinField() {
+    const email = document.getElementById('userName').value;
+    const pinInput = document.getElementById('pin');
+    const pinLabel = document.querySelector('label[for="pin"]');
+    const pinHelp = document.querySelector('small');
+
+    if (email && allUsersData[email]) {
+        const department = allUsersData[email].department;
+
+        if (department === '기업발전그룹') {
+            pinInput.setAttribute('maxlength', '6');
+            pinInput.removeAttribute('pattern');
+            pinInput.removeAttribute('inputmode');
+            pinInput.setAttribute('placeholder', '6자리 영문숫자');
+            pinLabel.textContent = 'PIN 번호 (6자리 영문숫자) *';
+            pinHelp.textContent = '영문숫자 6자리를 입력하세요';
+        } else {
+            pinInput.setAttribute('maxlength', '4');
+            pinInput.setAttribute('pattern', '[0-9]{4}');
+            pinInput.setAttribute('inputmode', 'numeric');
+            pinInput.setAttribute('placeholder', '4자리 숫자');
+            pinLabel.textContent = 'PIN 번호 (4자리) *';
+            pinHelp.textContent = '숫자 4자리를 입력하세요';
+        }
+
+        // PIN 입력 초기화
+        pinInput.value = '';
     }
 }
 
@@ -60,11 +100,24 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const pin = document.getElementById('pin').value;
     const rememberMe = document.getElementById('rememberMe').checked;
 
-    // PIN 유효성 검사
-    if (!/^\d{4}$/.test(pin)) {
-        messageDiv.className = 'message error';
-        messageDiv.textContent = 'PIN은 4자리 숫자여야 합니다.';
-        return;
+    // 사용자 부서 확인
+    const department = allUsersData[email]?.department || '';
+
+    // PIN 유효성 검사 (기업발전그룹은 6자리 영문숫자, 나머지는 4자리 숫자)
+    if (department === '기업발전그룹') {
+        if (!/^[a-zA-Z0-9]{6}$/.test(pin)) {
+            messageDiv.className = 'message error';
+            messageDiv.textContent = 'PIN은 6자리 영문숫자여야 합니다.';
+            messageDiv.style.display = 'block';
+            return;
+        }
+    } else {
+        if (!/^\d{4}$/.test(pin)) {
+            messageDiv.className = 'message error';
+            messageDiv.textContent = 'PIN은 4자리 숫자여야 합니다.';
+            messageDiv.style.display = 'block';
+            return;
+        }
     }
 
     messageDiv.className = 'message';
@@ -111,7 +164,16 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     }
 });
 
-// PIN 입력 시 숫자만 입력되도록
+// PIN 입력 제한 (부서에 따라 다르게 처리)
 document.getElementById('pin').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^\d]/g, '');
+    const email = document.getElementById('userName').value;
+    const department = allUsersData[email]?.department || '';
+
+    if (department === '기업발전그룹') {
+        // 기업발전그룹: 영문숫자만 허용, 최대 6자리
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6);
+    } else {
+        // 기타: 숫자만 허용, 최대 4자리
+        this.value = this.value.replace(/[^\d]/g, '').substring(0, 4);
+    }
 });

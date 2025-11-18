@@ -362,7 +362,9 @@ footer {
 }
 
 .user-table-container {
+    max-height: 600px; /* 스크롤 높이 제한 */
     overflow-x: auto;
+    overflow-y: auto; /* 세로 스크롤 추가 */
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -376,6 +378,9 @@ footer {
 .user-table thead {
     background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
     color: white;
+    position: sticky; /* 스크롤 시 헤더 고정 */
+    top: 0;
+    z-index: 10;
 }
 
 .user-table th,

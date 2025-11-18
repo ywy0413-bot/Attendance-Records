@@ -345,6 +345,7 @@ flatpickr("#date", {
     locale: "ko",
     dateFormat: "Y-m-d",
     defaultDate: today,
+    disableMobile: true, // 모바일에서도 커스텀 달력 사용 (공휴일 표시를 위해)
     onDayCreate: function(dObj, dStr, fp, dayElem) {
         // 로컬 날짜로 변환 (시간대 문제 방지)
         const year = dayElem.dateObj.getFullYear();

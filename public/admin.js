@@ -6,7 +6,7 @@ if (!currentUser) {
     document.getElementById('adminEmail').textContent = currentUser.email;
 
     // 관리자 권한 확인 (특정 이메일만 관리자로 설정)
-    const adminEmails = ['gwp@envision.co.kr', 'admin@company.com', 'manager@company.com'];
+    const adminEmails = ['envision@envision.co.kr', 'admin@company.com', 'manager@company.com'];
     if (!adminEmails.includes(currentUser.email)) {
         alert('관리자 권한이 없습니다.');
         window.location.href = 'index.html';
@@ -29,11 +29,19 @@ document.getElementById('addUserForm').addEventListener('submit', async function
     const pin = document.getElementById('newUserPin').value;
     const dept = document.getElementById('newUserDept').value;
 
-    // PIN 유효성 검사
-    if (!/^\d{4}$/.test(pin)) {
-        messageDiv.className = 'message error';
-        messageDiv.textContent = 'PIN은 4자리 숫자여야 합니다.';
-        return;
+    // PIN 유효성 검사 (기업발전그룹은 6자리 영문숫자, 나머지는 4자리 숫자)
+    if (dept === '기업발전그룹') {
+        if (!/^[a-zA-Z0-9]{6}$/.test(pin)) {
+            messageDiv.className = 'message error';
+            messageDiv.textContent = '기업발전그룹의 PIN은 6자리 영문숫자 조합이어야 합니다.';
+            return;
+        }
+    } else {
+        if (!/^\d{4}$/.test(pin)) {
+            messageDiv.className = 'message error';
+            messageDiv.textContent = 'PIN은 4자리 숫자여야 합니다.';
+            return;
+        }
     }
 
     messageDiv.className = 'message';
@@ -87,25 +95,14 @@ async function loadUsers() {
             });
         });
 
-        // 클라이언트 측에서 정렬 (최신순)
+        // 클라이언트 측에서 정렬 (이름 오름차순)
         allUsers.sort((a, b) => {
-            if (!a.createdAt) return 1;
-            if (!b.createdAt) return -1;
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
 
-            try {
-                // Firestore Timestamp 객체인지 확인
-                const aTime = typeof a.createdAt.toMillis === 'function'
-                    ? a.createdAt.toMillis()
-                    : new Date(a.createdAt).getTime();
-                const bTime = typeof b.createdAt.toMillis === 'function'
-                    ? b.createdAt.toMillis()
-                    : new Date(b.createdAt).getTime();
-
-                return bTime - aTime;
-            } catch (error) {
-                console.error('정렬 오류:', error);
-                return 0;
-            }
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
         });
 
         displayUsers(allUsers);
@@ -224,11 +221,21 @@ async function editUser(userId) {
     if (!newEnglishName) return;
 
     const newDept = prompt('새로운 그룹:', user.department || '');
-    const newPin = prompt('새로운 PIN (4자리, 변경하지 않으려면 비워두세요):', '');
+    const newPin = prompt('새로운 PIN (변경하지 않으려면 비워두세요):\n※ 기업발전그룹: 6자리 영문숫자\n※ 기타: 4자리 숫자', '');
 
-    if (newPin && !/^\d{4}$/.test(newPin)) {
-        alert('PIN은 4자리 숫자여야 합니다.');
-        return;
+    // PIN 유효성 검사 (기업발전그룹은 6자리 영문숫자, 나머지는 4자리 숫자)
+    if (newPin) {
+        if (newDept === '기업발전그룹') {
+            if (!/^[a-zA-Z0-9]{6}$/.test(newPin)) {
+                alert('기업발전그룹의 PIN은 6자리 영문숫자 조합이어야 합니다.');
+                return;
+            }
+        } else {
+            if (!/^\d{4}$/.test(newPin)) {
+                alert('PIN은 4자리 숫자여야 합니다.');
+                return;
+            }
+        }
     }
 
     try {
@@ -264,10 +271,36 @@ async function editUser(userId) {
     }
 }
 
-// PIN 입력 시 숫자만 입력되도록
+// PIN 입력 제한 (기업발전그룹은 영문숫자, 나머지는 숫자만)
+document.getElementById('newUserDept').addEventListener('input', updatePinValidation);
 document.getElementById('newUserPin').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^\d]/g, '');
+    const dept = document.getElementById('newUserDept').value;
+    if (dept === '기업발전그룹') {
+        // 기업발전그룹: 영문숫자만 허용, 최대 6자리
+        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6);
+    } else {
+        // 기타: 숫자만 허용, 최대 4자리
+        this.value = this.value.replace(/[^\d]/g, '').substring(0, 4);
+    }
 });
+
+function updatePinValidation() {
+    const dept = document.getElementById('newUserDept').value;
+    const pinInput = document.getElementById('newUserPin');
+    const pinLabel = document.querySelector('label[for="newUserPin"]');
+
+    if (dept === '기업발전그룹') {
+        pinInput.setAttribute('maxlength', '6');
+        pinInput.setAttribute('pattern', '[a-zA-Z0-9]{6}');
+        pinInput.setAttribute('placeholder', '1fbyep');
+        pinLabel.textContent = 'PIN (6자리 영문숫자) *';
+    } else {
+        pinInput.setAttribute('maxlength', '4');
+        pinInput.setAttribute('pattern', '[0-9]{4}');
+        pinInput.setAttribute('placeholder', '1234');
+        pinLabel.textContent = 'PIN (4자리) *';
+    }
+}
 
 // CSV 파일 업로드 및 일괄 등록
 async function uploadCSV() {
@@ -345,8 +378,15 @@ async function uploadCSV() {
                 // PIN 처리 (E열에 값이 있으면 사용, 없으면 기본값 0000)
                 let pin = '0000';
                 if (pinInput) {
-                    if (!/^\d{4}$/.test(pinInput)) {
-                        throw new Error(`${i + 1}번째 줄: PIN은 4자리 숫자여야 합니다.`);
+                    // 기업발전그룹은 6자리 영문숫자, 나머지는 4자리 숫자
+                    if (department === '기업발전그룹') {
+                        if (!/^[a-zA-Z0-9]{6}$/.test(pinInput)) {
+                            throw new Error(`${i + 1}번째 줄: 기업발전그룹의 PIN은 6자리 영문숫자 조합이어야 합니다.`);
+                        }
+                    } else {
+                        if (!/^\d{4}$/.test(pinInput)) {
+                            throw new Error(`${i + 1}번째 줄: PIN은 4자리 숫자여야 합니다.`);
+                        }
                     }
                     pin = pinInput;
                 }
