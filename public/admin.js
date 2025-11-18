@@ -6,7 +6,7 @@ if (!currentUser) {
     document.getElementById('adminEmail').textContent = currentUser.email;
 
     // 관리자 권한 확인 (특정 이메일만 관리자로 설정)
-    const adminEmails = ['envision@envision.co.kr', 'admin@company.com', 'manager@company.com'];
+    const adminEmails = ['gwp@envision.co.kr', 'envision@envision.co.kr', 'admin@company.com', 'manager@company.com'];
     if (!adminEmails.includes(currentUser.email)) {
         alert('관리자 권한이 없습니다.');
         window.location.href = 'index.html';
