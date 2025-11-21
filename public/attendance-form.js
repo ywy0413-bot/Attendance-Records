@@ -289,8 +289,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
     messageDiv.style.display = 'block';
 
     try {
-        // Firestore에 저장
-        await attendanceRecordsCollection.add(attendanceData);
+        // Firestore에 저장하고 문서 참조 가져오기
+        const docRef = await attendanceRecordsCollection.add(attendanceData);
+
+        // 이메일 발송 상태 추적 변수
+        let emailSent = false;
+        let emailError = null;
 
         // 이메일 발송 API 호출 - 30초 타임아웃 (Render 무료 티어 서버 시작 시간 포함)
         try {
@@ -310,17 +314,29 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
             if (emailResponse.ok) {
                 console.log('이메일이 성공적으로 발송되었습니다.');
+                emailSent = true;
             } else {
-                console.error('이메일 발송 실패:', await emailResponse.text());
+                const errorText = await emailResponse.text();
+                console.error('이메일 발송 실패:', errorText);
+                emailError = `서버 응답 오류: ${errorText}`;
             }
-        } catch (emailError) {
-            if (emailError.name === 'AbortError') {
+        } catch (error) {
+            if (error.name === 'AbortError') {
                 console.log('이메일 발송 시간 초과 (서버가 실행되지 않았을 수 있습니다)');
+                emailError = '이메일 발송 시간 초과 (서버 응답 없음)';
             } else {
-                console.error('이메일 발송 오류:', emailError);
+                console.error('이메일 발송 오류:', error);
+                emailError = error.message;
             }
             // 이메일 발송 실패해도 신고는 완료된 것으로 처리
         }
+
+        // Firestore에 이메일 발송 상태 업데이트
+        await attendanceRecordsCollection.doc(docRef.id).update({
+            emailSent: emailSent,
+            emailSentAt: emailSent ? firebase.firestore.FieldValue.serverTimestamp() : null,
+            emailError: emailError
+        });
 
         // 성공 팝업 표시
         alert('메일이 성공적으로 발송되었습니다.');
