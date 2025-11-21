@@ -74,7 +74,8 @@ app.post('/api/leave', async (req, res) => {
             endDate,
             startTime,
             endTime,
-            reason
+            reason,
+            isResend
         } = req.body;
 
         // 일자 표시 형식
@@ -133,6 +134,7 @@ app.post('/api/leave', async (req, res) => {
         </div>
         <div class="footer">
             <p>본 메일은 휴가/근태 신고 시스템에서 자동으로 발송된 메일입니다.</p>
+            ${isResend ? '<p style="color: #f44336; font-weight: bold;">* 본 메일은 관리자에 의해 재발송된 메일이니 참고 부탁드립니다.</p>' : ''}
             <p><a href="https://attendance-records-375b6.web.app" style="color: #667eea; text-decoration: none; font-weight: bold;">휴가/근태 신고 시스템 바로가기</a></p>
         </div>
     </div>
@@ -189,7 +191,8 @@ app.post('/api/attendance', async (req, res) => {
             date,
             startTime,
             endTime,
-            reason
+            reason,
+            isResend
         } = req.body;
 
         // 시간 표시 계산 (분 단위로 통일)
@@ -251,6 +254,7 @@ app.post('/api/attendance', async (req, res) => {
         </div>
         <div class="footer">
             <p>본 메일은 휴가/근태 신고 시스템에서 자동으로 발송된 메일입니다.</p>
+            ${isResend ? '<p style="color: #f44336; font-weight: bold;">* 본 메일은 관리자에 의해 재발송된 메일이니 참고 부탁드립니다.</p>' : ''}
             <p><a href="https://attendance-records-375b6.web.app" style="color: #667eea; text-decoration: none; font-weight: bold;">휴가/근태 신고 시스템 바로가기</a></p>
         </div>
     </div>

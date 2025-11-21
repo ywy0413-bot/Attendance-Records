@@ -28,28 +28,10 @@
             color: #666;
             line-height: 1.6;
         }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .stat-label {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
+        .records-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
         .filter-section {
             background: white;
@@ -108,11 +90,11 @@
                 <button onclick="searchRecords()" class="btn-primary">검색</button>
             </div>
 
-            <div class="stats" id="stats"></div>
-
             <div class="admin-section">
                 <h2>신고 내역</h2>
-                <div id="recordsList"></div>
+                <div class="records-container">
+                    <div id="recordsList"></div>
+                </div>
             </div>
 
             <div id="message" class="message"></div>
@@ -161,14 +143,17 @@
             messageDiv.style.display = 'block';
 
             try {
+                // 날짜 범위 설정 (시작일 00:00:00 ~ 종료일 23:59:59)
+                const startDateTime = firebase.firestore.Timestamp.fromDate(new Date(startDate + 'T00:00:00'));
+                const endDateTime = firebase.firestore.Timestamp.fromDate(new Date(endDate + 'T23:59:59'));
+
                 // 휴가 신고 조회
-                let leaveQuery = leaveRecordsCollection
-                    .where('createdAt', '>=', new Date(startDate))
-                    .where('createdAt', '<=', new Date(endDate + 'T23:59:59'));
+                const leaveSnapshot = await leaveRecordsCollection
+                    .where('createdAt', '>=', startDateTime)
+                    .where('createdAt', '<=', endDateTime)
+                    .get();
 
-                const leaveSnapshot = await leaveQuery.get();
                 const leaveRecords = [];
-
                 leaveSnapshot.forEach(doc => {
                     const data = doc.data();
                     if (!userName || data.reporterName?.includes(userName)) {
@@ -181,13 +166,12 @@
                 });
 
                 // 근태 신고 조회
-                let attendanceQuery = attendanceRecordsCollection
-                    .where('createdAt', '>=', new Date(startDate))
-                    .where('createdAt', '<=', new Date(endDate + 'T23:59:59'));
+                const attendanceSnapshot = await attendanceRecordsCollection
+                    .where('createdAt', '>=', startDateTime)
+                    .where('createdAt', '<=', endDateTime)
+                    .get();
 
-                const attendanceSnapshot = await attendanceQuery.get();
                 const attendanceRecords = [];
-
                 attendanceSnapshot.forEach(doc => {
                     const data = doc.data();
                     if (!userName || data.reporterName?.includes(userName)) {
@@ -207,7 +191,6 @@
                 });
 
                 displayRecords(allRecords);
-                displayStats(allRecords);
 
                 messageDiv.style.display = 'none';
 
@@ -216,29 +199,6 @@
                 messageDiv.className = 'message error';
                 messageDiv.textContent = '오류가 발생했습니다: ' + error.message;
             }
-        }
-
-        function displayStats(records) {
-            const total = records.length;
-            const leaveCount = records.filter(r => r.type === '휴가신고').length;
-            const attendanceCount = records.filter(r => r.type === '근태신고').length;
-
-            const statsHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${total}</div>
-                    <div class="stat-label">전체 신고</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${leaveCount}</div>
-                    <div class="stat-label">휴가 신고</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${attendanceCount}</div>
-                    <div class="stat-label">근태 신고</div>
-                </div>
-            `;
-
-            document.getElementById('stats').innerHTML = statsHTML;
         }
 
         function displayRecords(records) {
@@ -317,13 +277,16 @@
                     ? 'https://attendance-records.onrender.com/api/leave'
                     : 'https://attendance-records.onrender.com/api/attendance';
 
-                // 이메일 재발송
+                // 이메일 재발송 (isResend 플래그 추가)
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        ...data,
+                        isResend: true
+                    })
                 });
 
                 if (response.ok) {
