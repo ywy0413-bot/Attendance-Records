@@ -82,9 +82,11 @@
                         <label for="endDate">종료일</label>
                         <input type="date" id="endDate">
                     </div>
-                    <div class="form-group">
-                        <label for="userName">사용자 이름 (선택)</label>
-                        <input type="text" id="userName" placeholder="예: 정세영">
+                    <div class="form-group" style="display: flex; align-items: center; padding-top: 25px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="showUnknownOnly" style="width: auto; margin-right: 8px;">
+                            <span>상태 미확인만 보기</span>
+                        </label>
                     </div>
                 </div>
                 <button onclick="searchRecords()" class="btn-primary">검색</button>
@@ -130,7 +132,7 @@
         async function searchRecords() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            const userName = document.getElementById('userName').value.trim();
+            const showUnknownOnly = document.getElementById('showUnknownOnly').checked;
 
             if (!startDate || !endDate) {
                 alert('시작일과 종료일을 입력해주세요.');
@@ -156,13 +158,11 @@
                 const leaveRecords = [];
                 leaveSnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (!userName || data.reporterName?.includes(userName)) {
-                        leaveRecords.push({
-                            id: doc.id,
-                            type: '휴가신고',
-                            ...data
-                        });
-                    }
+                    leaveRecords.push({
+                        id: doc.id,
+                        type: '휴가신고',
+                        ...data
+                    });
                 });
 
                 // 근태 신고 조회
@@ -174,21 +174,24 @@
                 const attendanceRecords = [];
                 attendanceSnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (!userName || data.reporterName?.includes(userName)) {
-                        attendanceRecords.push({
-                            id: doc.id,
-                            type: '근태신고',
-                            ...data
-                        });
-                    }
+                    attendanceRecords.push({
+                        id: doc.id,
+                        type: '근태신고',
+                        ...data
+                    });
                 });
 
                 // 모든 신고 합치기 및 정렬
-                const allRecords = [...leaveRecords, ...attendanceRecords].sort((a, b) => {
+                let allRecords = [...leaveRecords, ...attendanceRecords].sort((a, b) => {
                     const aTime = a.createdAt?.toMillis?.() || 0;
                     const bTime = b.createdAt?.toMillis?.() || 0;
                     return bTime - aTime;
                 });
+
+                // 상태 미확인만 보기 필터
+                if (showUnknownOnly) {
+                    allRecords = allRecords.filter(record => !record.hasOwnProperty('emailSent'));
+                }
 
                 displayRecords(allRecords);
 
