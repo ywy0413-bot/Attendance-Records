@@ -47,6 +47,12 @@
                     <h2>관리자 페이지</h2>
                     <p>사용자 관리</p>
                 </a>
+
+                <a href="email-check.html" class="menu-card" id="emailCheckLink" style="display: none;">
+                    <div class="card-icon">📧</div>
+                    <h2>이메일 발송 확인</h2>
+                    <p>신고 내역 및 재발송</p>
+                </a>
             </div>
         </main>
 
@@ -65,6 +71,7 @@
             const adminEmails = ['gwp@envision.co.kr', 'envision@envision.co.kr', 'admin@company.com', 'manager@company.com'];
             if (adminEmails.includes(currentUser.email)) {
                 document.getElementById('adminLink').style.display = 'block';
+                document.getElementById('emailCheckLink').style.display = 'block';
             }
         }
     </script>

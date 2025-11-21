@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이메일 발송 내역 확인</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .record-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .record-card.no-email {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .record-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .record-details {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .resend-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .resend-btn:hover {
+            background: #45a049;
+        }
+        .resend-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="admin.html" class="back-button">← 관리자 페이지</a>
+            <h1>이메일 발송 내역 확인</h1>
+            <div class="user-info">
+                <span id="adminEmail"></span>
+                <button onclick="logout()" class="btn-logout">로그아웃</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="filter-section">
+                <h2>검색 조건</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">시작일</label>
+                        <input type="date" id="startDate" value="2024-11-19">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">종료일</label>
+                        <input type="date" id="endDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">사용자 이름 (선택)</label>
+                        <input type="text" id="userName" placeholder="예: 정세영">
+                    </div>
+                </div>
+                <button onclick="searchRecords()" class="btn-primary">검색</button>
+            </div>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="admin-section">
+                <h2>신고 내역</h2>
+                <div id="recordsList"></div>
+            </div>
+
+            <div id="message" class="message"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Attendance Records System - Email Check</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script src="firebase-config.js?v=20250121"></script>
+    <script src="auth.js?v=20250121"></script>
+    <script>
+        // 관리자 권한 체크
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('adminEmail').textContent = currentUser.email;
+            const adminEmails = ['gwp@envision.co.kr', 'envision@envision.co.kr', 'admin@company.com', 'manager@company.com'];
+            if (!adminEmails.includes(currentUser.email)) {
+                alert('관리자 권한이 없습니다.');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 오늘 날짜로 종료일 설정
+        document.getElementById('endDate').value = new Date().toISOString().split('T')[0];
+
+        async function searchRecords() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const userName = document.getElementById('userName').value.trim();
+
+            if (!startDate || !endDate) {
+                alert('시작일과 종료일을 입력해주세요.');
+                return;
+            }
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message';
+            messageDiv.textContent = '데이터 조회 중...';
+            messageDiv.style.display = 'block';
+
+            try {
+                // 휴가 신고 조회
+                let leaveQuery = leaveRecordsCollection
+                    .where('createdAt', '>=', new Date(startDate))
+                    .where('createdAt', '<=', new Date(endDate + 'T23:59:59'));
+
+                const leaveSnapshot = await leaveQuery.get();
+                const leaveRecords = [];
+
+                leaveSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (!userName || data.reporterName?.includes(userName)) {
+                        leaveRecords.push({
+                            id: doc.id,
+                            type: '휴가신고',
+                            ...data
+                        });
+                    }
+                });
+
+                // 근태 신고 조회
+                let attendanceQuery = attendanceRecordsCollection
+                    .where('createdAt', '>=', new Date(startDate))
+                    .where('createdAt', '<=', new Date(endDate + 'T23:59:59'));
+
+                const attendanceSnapshot = await attendanceQuery.get();
+                const attendanceRecords = [];
+
+                attendanceSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (!userName || data.reporterName?.includes(userName)) {
+                        attendanceRecords.push({
+                            id: doc.id,
+                            type: '근태신고',
+                            ...data
+                        });
+                    }
+                });
+
+                // 모든 신고 합치기 및 정렬
+                const allRecords = [...leaveRecords, ...attendanceRecords].sort((a, b) => {
+                    const aTime = a.createdAt?.toMillis?.() || 0;
+                    const bTime = b.createdAt?.toMillis?.() || 0;
+                    return bTime - aTime;
+                });
+
+                displayRecords(allRecords);
+                displayStats(allRecords);
+
+                messageDiv.style.display = 'none';
+
+            } catch (error) {
+                console.error('조회 오류:', error);
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '오류가 발생했습니다: ' + error.message;
+            }
+        }
+
+        function displayStats(records) {
+            const total = records.length;
+            const leaveCount = records.filter(r => r.type === '휴가신고').length;
+            const attendanceCount = records.filter(r => r.type === '근태신고').length;
+
+            const statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">전체 신고</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${leaveCount}</div>
+                    <div class="stat-label">휴가 신고</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${attendanceCount}</div>
+                    <div class="stat-label">근태 신고</div>
+                </div>
+            `;
+
+            document.getElementById('stats').innerHTML = statsHTML;
+        }
+
+        function displayRecords(records) {
+            const recordsList = document.getElementById('recordsList');
+
+            if (records.length === 0) {
+                recordsList.innerHTML = '<p style="text-align: center; color: #666;">조회된 신고 내역이 없습니다.</p>';
+                return;
+            }
+
+            const html = records.map(record => {
+                const createdDate = record.createdAt?.toDate?.()
+                    ? record.createdAt.toDate().toLocaleString('ko-KR')
+                    : '알 수 없음';
+
+                let details = '';
+                if (record.type === '휴가신고') {
+                    details = `
+                        <div>휴가 종류: ${record.leaveType || '-'}</div>
+                        <div>휴가 일수: ${record.leaveDays || '-'}일</div>
+                        <div>기간: ${record.startDate || '-'} ~ ${record.endDate || '-'}</div>
+                        ${record.reason ? `<div>사유: ${record.reason}</div>` : ''}
+                    `;
+                } else {
+                    details = `
+                        <div>근태 내용: ${record.attendanceType || '-'}</div>
+                        <div>일자: ${record.date || '-'}</div>
+                        <div>시간: ${record.startTime || '-'} ~ ${record.endTime || '-'}</div>
+                        ${record.reason ? `<div>사유: ${record.reason}</div>` : ''}
+                    `;
+                }
+
+                return `
+                    <div class="record-card">
+                        <div class="record-header">
+                            [${record.type}] ${record.reporterName || record.reporter}
+                            <span style="color: #999; font-size: 12px; font-weight: normal;">(${createdDate})</span>
+                        </div>
+                        <div class="record-details">
+                            <div>신고자: ${record.reporterEnglishName || record.reporterName || '-'} (${record.reporter})</div>
+                            ${details}
+                        </div>
+                        <button class="resend-btn" onclick="resendEmail('${record.id}', '${record.type}')">
+                            이메일 재발송
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            recordsList.innerHTML = html;
+        }
+
+        async function resendEmail(recordId, type) {
+            if (!confirm('이 신고의 이메일을 재발송하시겠습니까?')) {
+                return;
+            }
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message';
+            messageDiv.textContent = '이메일 재발송 중...';
+            messageDiv.style.display = 'block';
+
+            try {
+                // Firestore에서 데이터 가져오기
+                const collection = type === '휴가신고' ? leaveRecordsCollection : attendanceRecordsCollection;
+                const doc = await collection.doc(recordId).get();
+
+                if (!doc.exists) {
+                    throw new Error('신고 내역을 찾을 수 없습니다.');
+                }
+
+                const data = doc.data();
+
+                // API 엔드포인트 결정
+                const apiUrl = type === '휴가신고'
+                    ? 'https://attendance-records.onrender.com/api/leave'
+                    : 'https://attendance-records.onrender.com/api/attendance';
+
+                // 이메일 재발송
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = '이메일이 성공적으로 재발송되었습니다.';
+                } else {
+                    throw new Error('이메일 발송 실패: ' + await response.text());
+                }
+
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error('이메일 재발송 오류:', error);
+                messageDiv.className = 'message error';
+                messageDiv.textContent = '오류가 발생했습니다: ' + error.message;
+            }
+        }
+
+        // 페이지 로드 시 자동 검색
+        window.addEventListener('DOMContentLoaded', () => {
+            searchRecords();
+        });
+    </script>
+</body>
+</html>
