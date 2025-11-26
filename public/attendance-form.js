@@ -267,8 +267,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
     // 근태 사용일자가 오늘이 아닌 경우 확인
     const today = new Date().toISOString().split('T')[0];
-    if (attendanceData.date < today) {
-        if (!confirm('근태 사용일자가 오늘이 아닙니다. 사용일자가 맞으면 다음을 선택해 주시고, 수정하시려면 취소를 선택해주세요.')) {
+    if (attendanceData.date !== today) {
+        if (!confirm('근태 사용일자가 오늘이 아닙니다. 날짜를 수정하시려면 취소 버튼을 눌러주시고, 날짜 수정없이 계속 진행하시려면 확인 버튼을 눌러주세요.')) {
             return; // 취소하면 제출 중단
         }
     }
