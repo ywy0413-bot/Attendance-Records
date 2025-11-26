@@ -415,11 +415,30 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     // 0-1. Working days 검증 (전일휴가만 해당)
     if (leaveData.leaveType === '전일휴가') {
         const workingDays = calculateWorkingDays(leaveData.startDate, leaveData.endDate);
-        const diff = Math.abs(workingDays - leaveDaysNum);
-        // 차이가 1.0일 이상이면 경고
-        if (diff >= 1.0) {
-            alert('휴가 기간이 휴가 일수와 일치하지 않습니다');
-            return;
+
+        // 소수점이 있는 휴가일수인 경우 (예: 3.5일)
+        if (leaveDaysNum % 1 !== 0) {
+            const minWorkingDays = Math.floor(leaveDaysNum);
+            const maxWorkingDays = Math.ceil(leaveDaysNum);
+
+            // Working days가 최소값 이하인 경우
+            if (workingDays <= minWorkingDays) {
+                alert('휴가기간(Working day)이 휴가일수 보다 적습니다');
+                return;
+            }
+
+            // Working days가 최대값 초과인 경우
+            if (workingDays > maxWorkingDays) {
+                alert('휴가기간(Working day)이 휴가일수 보다 큽니다');
+                return;
+            }
+        } else {
+            // 정수인 경우 기존 로직 유지
+            const diff = Math.abs(workingDays - leaveDaysNum);
+            if (diff >= 1.0) {
+                alert('휴가 기간이 휴가 일수와 일치하지 않습니다');
+                return;
+            }
         }
     }
 
