@@ -592,14 +592,16 @@ ${leaveData.reason}` : '';
     }
 });
 
-// 오늘 날짜를 기본값으로 설정
-const today = new Date().toISOString().split('T')[0];
+// 오늘 날짜를 기본값으로 설정 (로컬 시간 기준)
+const today = new Date();
+const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    .toLocaleDateString('sv-SE'); // YYYY-MM-DD 형식
 
 // Flatpickr로 달력 초기화 (공휴일 표시)
 flatpickr("#startDate", {
     locale: "ko",
     dateFormat: "Y-m-d",
-    defaultDate: today,
+    defaultDate: localToday,
     disableMobile: true, // 모바일에서도 커스텀 달력 사용 (공휴일 표시를 위해)
     onDayCreate: function(dObj, dStr, fp, dayElem) {
         // 로컬 날짜로 변환 (시간대 문제 방지)
