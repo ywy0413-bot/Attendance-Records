@@ -83,7 +83,7 @@ function updatePinField() {
             pinInput.setAttribute('inputmode', 'numeric');
             pinInput.setAttribute('placeholder', '4자리 숫자');
             pinLabel.textContent = 'PIN 번호 (4자리) *';
-            pinHelp.textContent = '숫자 4자리를 입력하세요';
+            pinHelp.textContent = 'PIN번호는 개인 휴대전화 뒤 4자리입니다';
         }
 
         // PIN 입력 초기화
