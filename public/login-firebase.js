@@ -18,6 +18,26 @@ window.addEventListener('DOMContentLoaded', async () => {
 // 전역 변수로 사용자 목록 저장
 let allUsersData = {};
 
+// 즐겨찾기 관리 함수
+function getFavorites() {
+    const favorites = localStorage.getItem('favoriteUsers');
+    return favorites ? JSON.parse(favorites) : [];
+}
+
+function toggleFavorite(email) {
+    let favorites = getFavorites();
+    const index = favorites.indexOf(email);
+
+    if (index > -1) {
+        favorites.splice(index, 1); // 즐겨찾기 해제
+    } else {
+        favorites.push(email); // 즐겨찾기 추가
+    }
+
+    localStorage.setItem('favoriteUsers', JSON.stringify(favorites));
+    loadUserList(); // 목록 다시 로드
+}
+
 // 사용자 목록을 Firestore에서 가져와 드롭다운에 채우기
 async function loadUserList() {
     try {
@@ -36,19 +56,34 @@ async function loadUserList() {
             allUsersData[doc.id] = userInfo; // 이메일을 키로 저장
         });
 
-        // 이름을 가나다 순으로 정렬
-        users.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        // 즐겨찾기 목록 가져오기
+        const favorites = getFavorites();
+
+        // 즐겨찾기와 일반 사용자 분리
+        const favoriteUsers = users.filter(u => favorites.includes(u.email));
+        const normalUsers = users.filter(u => !favorites.includes(u.email));
+
+        // 각각 가나다순 정렬
+        favoriteUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        normalUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+        // 즐겨찾기를 먼저, 그 다음 일반 사용자
+        const sortedUsers = [...favoriteUsers, ...normalUsers];
 
         // 드롭다운에 옵션 추가
         const userSelect = document.getElementById('userName');
-        users.forEach(user => {
+        userSelect.innerHTML = '<option value="">사용자를 선택하세요</option>'; // 초기화
+
+        sortedUsers.forEach(user => {
             const option = document.createElement('option');
             option.value = user.email;
-            option.textContent = user.name;
+            const isFavorite = favorites.includes(user.email);
+            option.textContent = (isFavorite ? '⭐ ' : '') + user.name;
             userSelect.appendChild(option);
         });
 
         // 사용자 선택 시 PIN 필드 업데이트
+        userSelect.removeEventListener('change', updatePinField);
         userSelect.addEventListener('change', updatePinField);
 
     } catch (error) {
@@ -66,6 +101,7 @@ function updatePinField() {
     const pinInput = document.getElementById('pin');
     const pinLabel = document.querySelector('label[for="pin"]');
     const pinHelp = document.querySelector('small');
+    const favoriteBtn = document.getElementById('favoriteBtn');
 
     if (email && allUsersData[email]) {
         const department = allUsersData[email].department;
@@ -88,6 +124,23 @@ function updatePinField() {
 
         // PIN 입력 초기화
         pinInput.value = '';
+
+        // 즐겨찾기 버튼 표시 및 텍스트 업데이트
+        const favorites = getFavorites();
+        const isFavorite = favorites.includes(email);
+        favoriteBtn.style.display = 'block';
+        favoriteBtn.textContent = isFavorite ? '⭐ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
+    } else {
+        // 사용자 선택 안됨
+        favoriteBtn.style.display = 'none';
+    }
+}
+
+// 현재 선택된 사용자의 즐겨찾기 토글
+function toggleCurrentUserFavorite() {
+    const email = document.getElementById('userName').value;
+    if (email) {
+        toggleFavorite(email);
     }
 }
 
