@@ -4,9 +4,27 @@ const sgMail = require('@sendgrid/mail');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const admin = require('firebase-admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Firebase Admin SDK 초기화
+let db = null;
+try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        db = admin.firestore();
+        console.log('✓ Firebase Admin SDK 초기화 성공');
+    } else {
+        console.log('⚠ FIREBASE_SERVICE_ACCOUNT 환경변수가 설정되지 않음 - Webhook 기능 비활성화');
+    }
+} catch (error) {
+    console.error('✗ Firebase Admin SDK 초기화 실패:', error.message);
+}
 
 // 미들웨어 설정
 app.use(cors());
@@ -325,6 +343,85 @@ app.get('/api/smtp-status', async (req, res) => {
 // 메인 페이지 라우트 (로그인 페이지로 리다이렉트)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// SendGrid Event Webhook 엔드포인트
+app.post('/api/sendgrid-webhook', async (req, res) => {
+    console.log('▶ SendGrid Webhook 이벤트 수신');
+
+    try {
+        const events = req.body;
+
+        if (!Array.isArray(events)) {
+            console.log('잘못된 webhook 데이터 형식');
+            return res.status(400).json({ error: 'Invalid data format' });
+        }
+
+        if (!db) {
+            console.log('⚠ Firebase가 초기화되지 않아 Webhook 처리 불가');
+            return res.status(200).json({ message: 'Webhook received but Firebase not initialized' });
+        }
+
+        for (const event of events) {
+            const { event: eventType, email, sg_message_id, timestamp } = event;
+
+            console.log(`  - 이벤트: ${eventType}, 수신자: ${email}, 메시지ID: ${sg_message_id}`);
+
+            // delivered, blocked, bounce, deferred, dropped 이벤트 처리
+            if (['delivered', 'blocked', 'bounce', 'deferred', 'dropped'].includes(eventType)) {
+                // 이메일 제목에서 신고 정보 추출
+                const subject = event.subject || '';
+
+                // Firestore에서 해당 레코드 찾기 (최근 24시간 내)
+                const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+                // 근태신고 컬렉션 검색
+                const attendanceQuery = await db.collection('attendanceRecords')
+                    .where('createdAt', '>=', oneDayAgo)
+                    .get();
+
+                for (const doc of attendanceQuery.docs) {
+                    const data = doc.data();
+                    const docSubject = `[근태공유] ${data.reporterEnglishName}(${data.date}, ${data.attendanceType}`;
+
+                    if (subject.includes(docSubject) || (data.reporterEnglishName && subject.includes(data.reporterEnglishName))) {
+                        await doc.ref.update({
+                            emailDeliveryStatus: eventType,
+                            emailDeliveryTimestamp: new Date(timestamp * 1000),
+                            emailDeliveryError: event.reason || null
+                        });
+                        console.log(`    ✓ 근태신고 업데이트: ${doc.id} -> ${eventType}`);
+                    }
+                }
+
+                // 휴가신고 컬렉션 검색
+                const leaveQuery = await db.collection('leaveRecords')
+                    .where('createdAt', '>=', oneDayAgo)
+                    .get();
+
+                for (const doc of leaveQuery.docs) {
+                    const data = doc.data();
+                    const docSubject = data.leaveType === '경조휴가'
+                        ? `[경조휴가] ${data.reporterEnglishName}`
+                        : `[휴가신고] ${data.reporterEnglishName}`;
+
+                    if (subject.includes(docSubject) || (data.reporterEnglishName && subject.includes(data.reporterEnglishName))) {
+                        await doc.ref.update({
+                            emailDeliveryStatus: eventType,
+                            emailDeliveryTimestamp: new Date(timestamp * 1000),
+                            emailDeliveryError: event.reason || null
+                        });
+                        console.log(`    ✓ 휴가신고 업데이트: ${doc.id} -> ${eventType}`);
+                    }
+                }
+            }
+        }
+
+        res.status(200).json({ message: 'Webhook processed successfully' });
+    } catch (error) {
+        console.error('✗ Webhook 처리 오류:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // 서버 시작

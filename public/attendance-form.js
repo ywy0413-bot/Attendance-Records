@@ -198,6 +198,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
     const endHour = document.getElementById('endHour').value;
     const endMinute = document.getElementById('endMinute').value;
 
+    // 시작시간과 종료시간 유효성 검사
+    if (!startHour || !startMinute || !endHour || !endMinute) {
+        alert('시작시간과 종료시간을 모두 입력해주세요.');
+        return;
+    }
+
     const startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
     const endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
 

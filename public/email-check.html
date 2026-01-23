@@ -57,6 +57,29 @@
             background: #ccc;
             cursor: not-allowed;
         }
+        .record-card.delivery-failed {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        .status-delivered {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-blocked, .status-bounce, .status-dropped {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .status-deferred {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        .delivery-status {
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -223,14 +246,33 @@
                 const hasEmailStatus = record.hasOwnProperty('emailSent');
                 const emailSent = hasEmailStatus ? record.emailSent : null;
 
+                // 실제 전달 상태 확인 (SendGrid Webhook에서 업데이트)
+                const deliveryStatus = record.emailDeliveryStatus;
+                const deliveryError = record.emailDeliveryError;
+
                 // 상태 배지 생성
                 let statusBadge = '';
+                let deliveryBadge = '';
+
                 if (hasEmailStatus) {
                     statusBadge = emailSent
                         ? '<span style="color: #4CAF50; font-weight: bold; margin-left: 10px;">✓ 발송완료</span>'
                         : '<span style="color: #f44336; font-weight: bold; margin-left: 10px;">✗ 발송실패</span>';
                 } else {
                     statusBadge = '<span style="color: #999; margin-left: 10px;">상태 미확인</span>';
+                }
+
+                // 실제 전달 상태 표시
+                if (deliveryStatus) {
+                    const statusMap = {
+                        'delivered': { text: '✓ 전달완료', class: 'status-delivered' },
+                        'blocked': { text: '✗ 차단됨', class: 'status-blocked' },
+                        'bounce': { text: '✗ 반송됨', class: 'status-bounce' },
+                        'deferred': { text: '⏳ 지연됨', class: 'status-deferred' },
+                        'dropped': { text: '✗ 삭제됨', class: 'status-dropped' }
+                    };
+                    const statusInfo = statusMap[deliveryStatus] || { text: deliveryStatus, class: '' };
+                    deliveryBadge = `<span class="delivery-status ${statusInfo.class}">[실제전달] ${statusInfo.text}</span>`;
                 }
 
                 let details = '';
@@ -250,8 +292,18 @@
                     `;
                 }
 
+                // 카드 클래스 결정 (전달 실패 또는 발송 실패)
+                let cardClass = 'record-card';
+                if (emailSent === false) {
+                    cardClass += ' no-email';
+                } else if (deliveryStatus && ['blocked', 'bounce', 'dropped'].includes(deliveryStatus)) {
+                    cardClass += ' no-email';
+                } else if (deliveryStatus === 'deferred') {
+                    cardClass += ' delivery-failed';
+                }
+
                 return `
-                    <div class="record-card ${emailSent === false ? 'no-email' : ''}">
+                    <div class="${cardClass}">
                         <div class="record-header">
                             [${record.type}] ${record.reporterName || record.reporter}
                             ${statusBadge}
@@ -260,7 +312,9 @@
                         <div class="record-details">
                             <div>신고자: ${record.reporterEnglishName || record.reporterName || '-'} (${record.reporter})</div>
                             ${details}
-                            ${emailSent === false && record.emailError ? `<div style="color: #f44336; font-size: 13px; margin-top: 8px; padding: 8px; background: #fff; border-radius: 4px; border-left: 3px solid #f44336;">⚠️ 오류: ${record.emailError}</div>` : ''}
+                            ${deliveryBadge ? `<div style="margin-top: 8px;">${deliveryBadge}</div>` : ''}
+                            ${emailSent === false && record.emailError ? `<div style="color: #f44336; font-size: 13px; margin-top: 8px; padding: 8px; background: #fff; border-radius: 4px; border-left: 3px solid #f44336;">⚠️ 발송 오류: ${record.emailError}</div>` : ''}
+                            ${deliveryError ? `<div style="color: #ff9800; font-size: 13px; margin-top: 8px; padding: 8px; background: #fff; border-radius: 4px; border-left: 3px solid #ff9800;">⚠️ 전달 오류: ${deliveryError}</div>` : ''}
                         </div>
                         <button class="resend-btn" onclick="resendEmail('${record.id}', '${record.type}')">
                             이메일 재발송
@@ -298,16 +352,43 @@
                     ? 'https://attendance-records.onrender.com/api/leave'
                     : 'https://attendance-records.onrender.com/api/attendance';
 
-                // 이메일 재발송 (isResend 플래그 추가)
+                // 필요한 필드만 추출 (Timestamp 등 특수 객체 제외)
+                let requestBody;
+                if (type === '휴가신고') {
+                    requestBody = {
+                        reporter: data.reporter,
+                        reporterName: data.reporterName,
+                        reporterEnglishName: data.reporterEnglishName,
+                        leaveType: data.leaveType,
+                        leaveDays: data.leaveDays,
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                        startTime: data.startTime,
+                        endTime: data.endTime,
+                        reason: data.reason,
+                        isResend: true
+                    };
+                } else {
+                    requestBody = {
+                        reporter: data.reporter,
+                        reporterName: data.reporterName,
+                        reporterEnglishName: data.reporterEnglishName,
+                        attendanceType: data.attendanceType,
+                        date: data.date,
+                        startTime: data.startTime,
+                        endTime: data.endTime,
+                        reason: data.reason,
+                        isResend: true
+                    };
+                }
+
+                // 이메일 재발송
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        ...data,
-                        isResend: true
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (response.ok) {

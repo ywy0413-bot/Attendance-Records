@@ -357,6 +357,12 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
             const endHour = document.getElementById('endHour').value;
             const endMinute = document.getElementById('endMinute').value;
 
+            // 직접입력 시 시간 유효성 검사
+            if (!startHour || !startMinute || !endHour || !endMinute) {
+                alert('시작시간과 종료시간을 모두 입력해주세요.');
+                return;
+            }
+
             startTime = startHour && startMinute ? `${startHour}:${startMinute}` : '';
             endTime = endHour && endMinute ? `${endHour}:${endMinute}` : '';
         } else if (timeSelect) {
@@ -365,8 +371,9 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
             startTime = timeParts[0];
             endTime = timeParts[1];
         } else {
-            startTime = '';
-            endTime = '';
+            // 시간 선택이 안 된 경우
+            alert('시간을 선택해주세요.');
+            return;
         }
     }
 

@@ -17,6 +17,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // 전역 변수로 사용자 목록 저장
 let allUsersData = {};
+let allUsers = [];
 
 // 즐겨찾기 관리 함수
 function getFavorites() {
@@ -35,14 +36,14 @@ function toggleFavorite(email) {
     }
 
     localStorage.setItem('favoriteUsers', JSON.stringify(favorites));
-    loadUserList(); // 목록 다시 로드
+    renderUserOptions(document.getElementById('userSearch').value);
 }
 
 // 사용자 목록을 Firestore에서 가져와 드롭다운에 채우기
 async function loadUserList() {
     try {
         const snapshot = await usersCollection.get();
-        const users = [];
+        allUsers = [];
 
         snapshot.forEach(doc => {
             const userData = doc.data();
@@ -52,39 +53,15 @@ async function loadUserList() {
                 englishName: userData.englishName,
                 department: userData.department || ''
             };
-            users.push(userInfo);
-            allUsersData[doc.id] = userInfo; // 이메일을 키로 저장
+            allUsers.push(userInfo);
+            allUsersData[doc.id] = userInfo;
         });
 
-        // 즐겨찾기 목록 가져오기
-        const favorites = getFavorites();
+        // 커스텀 드롭다운 렌더링
+        renderUserOptions();
 
-        // 즐겨찾기와 일반 사용자 분리
-        const favoriteUsers = users.filter(u => favorites.includes(u.email));
-        const normalUsers = users.filter(u => !favorites.includes(u.email));
-
-        // 각각 가나다순 정렬
-        favoriteUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-        normalUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-
-        // 즐겨찾기를 먼저, 그 다음 일반 사용자
-        const sortedUsers = [...favoriteUsers, ...normalUsers];
-
-        // 드롭다운에 옵션 추가
-        const userSelect = document.getElementById('userName');
-        userSelect.innerHTML = '<option value="">사용자를 선택하세요</option>'; // 초기화
-
-        sortedUsers.forEach(user => {
-            const option = document.createElement('option');
-            option.value = user.email;
-            const isFavorite = favorites.includes(user.email);
-            option.textContent = (isFavorite ? '⭐ ' : '') + user.name;
-            userSelect.appendChild(option);
-        });
-
-        // 사용자 선택 시 PIN 필드 업데이트
-        userSelect.removeEventListener('change', updatePinField);
-        userSelect.addEventListener('change', updatePinField);
+        // 이벤트 리스너 설정
+        setupCustomSelect();
 
     } catch (error) {
         console.error('사용자 목록 로드 오류:', error);
@@ -95,13 +72,119 @@ async function loadUserList() {
     }
 }
 
+// 사용자 옵션 렌더링
+function renderUserOptions(searchQuery = '') {
+    const favorites = getFavorites();
+    const optionsList = document.getElementById('userOptionsList');
+
+    // 검색어로 필터링
+    let filteredUsers = allUsers.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // 즐겨찾기와 일반 사용자 분리
+    const favoriteUsers = filteredUsers.filter(u => favorites.includes(u.email));
+    const normalUsers = filteredUsers.filter(u => !favorites.includes(u.email));
+
+    // 각각 가나다순 정렬
+    favoriteUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    normalUsers.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+
+    // 즐겨찾기를 먼저, 그 다음 일반 사용자
+    const sortedUsers = [...favoriteUsers, ...normalUsers];
+
+    // HTML 생성
+    optionsList.innerHTML = sortedUsers.map(user => {
+        const isFavorite = favorites.includes(user.email);
+        const starClass = isFavorite ? 'active' : 'inactive';
+        const starIcon = isFavorite ? '⭐' : '☆';
+        return `
+            <div class="custom-select-option" data-email="${user.email}">
+                <span class="custom-select-option-name">${user.name}</span>
+                <span class="custom-select-favorite ${starClass}"
+                      data-email="${user.email}"
+                      onclick="event.stopPropagation(); toggleFavorite('${user.email}')">
+                    ${starIcon}
+                </span>
+            </div>
+        `;
+    }).join('');
+
+    // 옵션 클릭 이벤트
+    optionsList.querySelectorAll('.custom-select-option').forEach(option => {
+        option.addEventListener('click', function() {
+            selectUser(this.dataset.email);
+        });
+    });
+}
+
+// 커스텀 셀렉트 이벤트 설정
+function setupCustomSelect() {
+    const trigger = document.getElementById('userSelectTrigger');
+    const dropdown = document.getElementById('userSelectDropdown');
+    const searchInput = document.getElementById('userSearch');
+
+    // 드롭다운 토글
+    trigger.addEventListener('click', function() {
+        const isActive = dropdown.classList.contains('active');
+        if (isActive) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    });
+
+    // 검색 입력
+    searchInput.addEventListener('input', function(e) {
+        renderUserOptions(e.target.value);
+    });
+
+    // 드롭다운 외부 클릭 시 닫기
+    document.addEventListener('click', function(e) {
+        const wrapper = document.querySelector('.custom-select-wrapper');
+        if (!wrapper.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+}
+
+function openDropdown() {
+    const trigger = document.getElementById('userSelectTrigger');
+    const dropdown = document.getElementById('userSelectDropdown');
+    const searchInput = document.getElementById('userSearch');
+
+    trigger.classList.add('active');
+    dropdown.classList.add('active');
+    searchInput.value = '';
+    searchInput.focus();
+    renderUserOptions();
+}
+
+function closeDropdown() {
+    const trigger = document.getElementById('userSelectTrigger');
+    const dropdown = document.getElementById('userSelectDropdown');
+
+    trigger.classList.remove('active');
+    dropdown.classList.remove('active');
+}
+
+// 사용자 선택
+function selectUser(email) {
+    const user = allUsersData[email];
+    if (user) {
+        document.getElementById('selectedUserName').textContent = user.name;
+        document.getElementById('userName').value = email;
+        updatePinField();
+        closeDropdown();
+    }
+}
+
 // 선택한 사용자에 따라 PIN 필드 업데이트
 function updatePinField() {
     const email = document.getElementById('userName').value;
     const pinInput = document.getElementById('pin');
     const pinLabel = document.querySelector('label[for="pin"]');
     const pinHelp = document.querySelector('small');
-    const favoriteBtn = document.getElementById('favoriteBtn');
 
     if (email && allUsersData[email]) {
         const department = allUsersData[email].department;
@@ -124,23 +207,6 @@ function updatePinField() {
 
         // PIN 입력 초기화
         pinInput.value = '';
-
-        // 즐겨찾기 버튼 표시 및 텍스트 업데이트
-        const favorites = getFavorites();
-        const isFavorite = favorites.includes(email);
-        favoriteBtn.style.display = 'block';
-        favoriteBtn.textContent = isFavorite ? '⭐ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
-    } else {
-        // 사용자 선택 안됨
-        favoriteBtn.style.display = 'none';
-    }
-}
-
-// 현재 선택된 사용자의 즐겨찾기 토글
-function toggleCurrentUserFavorite() {
-    const email = document.getElementById('userName').value;
-    if (email) {
-        toggleFavorite(email);
     }
 }
 
@@ -149,28 +215,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     e.preventDefault();
 
     const messageDiv = document.getElementById('message');
-    const email = document.getElementById('userName').value; // 선택된 사용자의 이메일
+    const email = document.getElementById('userName').value;
     const pin = document.getElementById('pin').value;
     const rememberMe = document.getElementById('rememberMe').checked;
 
-    // 사용자 부서 확인
-    const department = allUsersData[email]?.department || '';
+    if (!email) {
+        alert('사용자를 선택해주세요.');
+        return;
+    }
 
-    // PIN 유효성 검사 (기업발전그룹은 6자리 영문숫자, 나머지는 4자리 숫자)
-    if (department === '기업발전그룹') {
-        if (!/^[a-zA-Z0-9]{6}$/.test(pin)) {
-            messageDiv.className = 'message error';
-            messageDiv.textContent = 'PIN은 6자리 영문숫자여야 합니다.';
-            messageDiv.style.display = 'block';
-            return;
-        }
-    } else {
-        if (!/^\d{4}$/.test(pin)) {
-            messageDiv.className = 'message error';
-            messageDiv.textContent = 'PIN은 4자리 숫자여야 합니다.';
-            messageDiv.style.display = 'block';
-            return;
-        }
+    if (!pin) {
+        alert('PIN 번호를 입력해주세요.');
+        return;
     }
 
     messageDiv.className = 'message';
@@ -178,55 +234,40 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     messageDiv.style.display = 'block';
 
     try {
-        // Firestore에서 사용자 확인
         const userDoc = await usersCollection.doc(email).get();
 
-        if (userDoc.exists) {
-            const userData = userDoc.data();
-
-            // PIN 확인
-            if (userData.pin === pin) {
-                // 로그인 성공 - 사용자 정보 저장
-                const loginData = {
-                    email: email,
-                    name: userData.name || email,
-                    department: userData.department || '',
-                    rememberMe: rememberMe,
-                    loginTime: new Date().toISOString()
-                };
-
-                localStorage.setItem('userData', JSON.stringify(loginData));
-
-                messageDiv.className = 'message success';
-                messageDiv.textContent = '로그인 성공! 메인 페이지로 이동합니다...';
-
-                // 1초 후 메인 페이지로 이동
-                setTimeout(() => {
-                    window.location.href = 'main.html';
-                }, 1000);
-            } else {
-                throw new Error('PIN이 올바르지 않습니다.');
-            }
-        } else {
-            throw new Error('등록되지 않은 이메일입니다.');
+        if (!userDoc.exists) {
+            throw new Error('존재하지 않는 사용자입니다.');
         }
+
+        const userData = userDoc.data();
+        const storedPin = userData.pin;
+
+        if (pin === storedPin) {
+            const userInfo = {
+                email: email,
+                name: userData.name,
+                englishName: userData.englishName,
+                department: userData.department || '',
+                rememberMe: rememberMe
+            };
+
+            localStorage.setItem('userData', JSON.stringify(userInfo));
+
+            messageDiv.className = 'message success';
+            messageDiv.textContent = '로그인 성공! 메인 페이지로 이동합니다...';
+
+            setTimeout(() => {
+                window.location.href = 'main.html';
+            }, 500);
+
+        } else {
+            throw new Error('PIN 번호가 올바르지 않습니다.');
+        }
+
     } catch (error) {
         console.error('로그인 오류:', error);
         messageDiv.className = 'message error';
-        messageDiv.textContent = '로그인 오류: ' + error.message;
-    }
-});
-
-// PIN 입력 제한 (부서에 따라 다르게 처리)
-document.getElementById('pin').addEventListener('input', function(e) {
-    const email = document.getElementById('userName').value;
-    const department = allUsersData[email]?.department || '';
-
-    if (department === '기업발전그룹') {
-        // 기업발전그룹: 영문숫자만 허용, 최대 6자리
-        this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6);
-    } else {
-        // 기타: 숫자만 허용, 최대 4자리
-        this.value = this.value.replace(/[^\d]/g, '').substring(0, 4);
+        messageDiv.textContent = error.message || '로그인에 실패했습니다.';
     }
 });
