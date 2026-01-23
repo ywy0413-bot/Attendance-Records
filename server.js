@@ -367,8 +367,8 @@ app.post('/api/sendgrid-webhook', async (req, res) => {
 
             console.log(`  - 이벤트: ${eventType}, 수신자: ${email}, 메시지ID: ${sg_message_id}`);
 
-            // delivered, blocked, bounce, deferred, dropped 이벤트 처리
-            if (['delivered', 'blocked', 'bounce', 'deferred', 'dropped'].includes(eventType)) {
+            // delivered, bounce, deferred, dropped 이벤트 처리
+            if (['delivered', 'bounce', 'deferred', 'dropped'].includes(eventType)) {
                 // 이메일 제목에서 신고 정보 추출
                 const subject = event.subject || '';
 
