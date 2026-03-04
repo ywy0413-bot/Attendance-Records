@@ -78,6 +78,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// 이메일 주소가 신고자 이름으로 저장된 경우 Firestore에서 실제 이름 조회
+async function resolveReporterName(reporter, reporterEnglishName, reporterName) {
+    if (!db || !reporter) return { reporterEnglishName, reporterName };
+    const isEmail = (val) => val && val.includes('@');
+    if (isEmail(reporterEnglishName) || isEmail(reporterName)) {
+        try {
+            const userDoc = await db.collection('users').doc(reporter).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                return {
+                    reporterEnglishName: data.englishName || reporterEnglishName,
+                    reporterName: data.name || reporterName
+                };
+            }
+        } catch (e) {
+            console.error('사용자 이름 조회 오류:', e.message);
+        }
+    }
+    return { reporterEnglishName, reporterName };
+}
+
 // 휴가 신고 API
 app.post('/api/leave', async (req, res) => {
     console.log('▶ 휴가 신고 API 요청 수신');
@@ -95,6 +116,11 @@ app.post('/api/leave', async (req, res) => {
             reason,
             isResend
         } = req.body;
+
+        // 이름이 이메일로 저장된 경우 Firestore에서 실제 이름 조회
+        const resolved = await resolveReporterName(reporter, reporterEnglishName, reporterName);
+        const finalEnglishName = resolved.reporterEnglishName;
+        const finalName = resolved.reporterName;
 
         // 일자 표시 형식
         const dateDisplay = startDate === endDate
@@ -117,7 +143,7 @@ app.post('/api/leave', async (req, res) => {
 
         // 이메일 제목 생성 (경조휴가는 별도 제목)
         const emailTitle = leaveType === '경조휴가' ? '[경조휴가]' : '[휴가신고]';
-        const emailSubject = `${emailTitle} ${reporterEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
+        const emailSubject = `${emailTitle} ${finalEnglishName}(${startDate}, ${leaveType}, ${leaveDays}일)`;
         const emailBody = `
 <!DOCTYPE html>
 <html>
@@ -139,7 +165,7 @@ app.post('/api/leave', async (req, res) => {
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>
-                <span class="value">${reporterEnglishName}</span>
+                <span class="value">${finalEnglishName}</span>
             </div>
             <div class="info-row">
                 <span class="label">2. 휴가일수:</span>
@@ -165,7 +191,7 @@ app.post('/api/leave', async (req, res) => {
             to: TO_EMAIL,
             from: {
                 email: FROM_EMAIL,
-                name: reporterEnglishName
+                name: finalEnglishName
             },
             subject: emailSubject,
             html: emailBody
@@ -213,6 +239,17 @@ app.post('/api/attendance', async (req, res) => {
             isResend
         } = req.body;
 
+        // 휴가차감, Outlook 직접입력 등 이메일 불필요 기록은 발송하지 않음
+        if (attendanceType === '휴가차감' || req.body.isDeduction || req.body.noEmailRequired || req.body.isOutlookRecord) {
+            console.log('▶ 이메일 발송 불필요 기록 - 스킵:', attendanceType);
+            return res.status(200).json({ message: '이메일 발송 불필요 기록입니다.' });
+        }
+
+        // 이름이 이메일로 저장된 경우 Firestore에서 실제 이름 조회
+        const resolved = await resolveReporterName(reporter, reporterEnglishName, reporterName);
+        const finalEnglishName = resolved.reporterEnglishName;
+        const finalName = resolved.reporterName;
+
         // 시간 표시 계산 (분 단위로 통일)
         let timeDisplay = startTime;
         let durationText = '';
@@ -228,8 +265,8 @@ app.post('/api/attendance', async (req, res) => {
 
         // 이메일 제목 생성: [근태공유] EnglishName(Date, AttendanceType, Duration)
         const emailSubject = durationText
-            ? `[근태공유] ${reporterEnglishName}(${date}, ${attendanceType}, ${durationText})`
-            : `[근태공유] ${reporterEnglishName}(${date}, ${attendanceType})`;
+            ? `[근태공유] ${finalEnglishName}(${date}, ${attendanceType}, ${durationText})`
+            : `[근태공유] ${finalEnglishName}(${date}, ${attendanceType})`;
         const emailBody = `
 <!DOCTYPE html>
 <html>
@@ -251,7 +288,7 @@ app.post('/api/attendance', async (req, res) => {
         <div class="content">
             <div class="info-row">
                 <span class="label">1. 신고자:</span>
-                <span class="value">${reporterEnglishName}</span>
+                <span class="value">${finalEnglishName}</span>
             </div>
             <div class="info-row">
                 <span class="label">2. 근태공유:</span>
@@ -285,7 +322,7 @@ app.post('/api/attendance', async (req, res) => {
             to: TO_EMAIL,
             from: {
                 email: FROM_EMAIL,
-                name: reporterEnglishName
+                name: finalEnglishName
             },
             subject: emailSubject,
             html: emailBody
