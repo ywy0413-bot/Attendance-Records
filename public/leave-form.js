@@ -378,6 +378,10 @@ document.getElementById('leaveForm').addEventListener('submit', async function(e
     }
 
     // 폼 데이터 수집
+    if (!currentUserData) {
+        await loadCurrentUser();
+    }
+
     const leaveDays = document.getElementById('leaveDays').value === '기타'
         ? document.getElementById('customDays').value
         : document.getElementById('leaveDays').value;

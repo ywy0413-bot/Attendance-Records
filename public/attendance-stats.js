@@ -265,11 +265,16 @@ async function deductVacation() {
     }
 
     try {
+        // 사용자 영문 이름 조회
+        const userDoc = await usersCollection.doc(currentUser.email).get();
+        const userEnglishName = userDoc.exists ? (userDoc.data().englishName || currentUser.email) : currentUser.email;
+        const userName = userDoc.exists ? (userDoc.data().name || currentUser.email) : currentUser.email;
+
         // 휴가 차감 기록 생성
         const deductionData = {
             reporter: currentUser.email,
-            reporterName: currentUser.email,
-            reporterEnglishName: currentUser.email,
+            reporterName: userName,
+            reporterEnglishName: userEnglishName,
             attendanceType: '휴가차감',
             date: new Date().toISOString().split('T')[0],
             startTime: '00:00',
@@ -277,7 +282,8 @@ async function deductVacation() {
             reason: `휴가 ${vacationDays}일 차감`,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             isDeduction: true, // 차감 기록 표시
-            deductionMinutes: minutesToDeduct // 차감 분수 저장
+            deductionMinutes: minutesToDeduct, // 차감 분수 저장
+            noEmailRequired: true // 이메일 발송 불필요
         };
 
         // Firestore에 저장
@@ -328,6 +334,11 @@ async function addOutlookRecord() {
     }
 
     try {
+        // 사용자 영문 이름 조회
+        const userDoc = await usersCollection.doc(currentUser.email).get();
+        const userEnglishName = userDoc.exists ? (userDoc.data().englishName || currentUser.email) : currentUser.email;
+        const userName = userDoc.exists ? (userDoc.data().name || currentUser.email) : currentUser.email;
+
         // 시작/종료 시간 생성
         const startHour = 9; // 기본 시작 시간 09:00
         const startMinute = 0;
@@ -340,15 +351,16 @@ async function addOutlookRecord() {
         // Outlook 신고 기록 생성
         const outlookData = {
             reporter: currentUser.email,
-            reporterName: currentUser.email,
-            reporterEnglishName: currentUser.email,
+            reporterName: userName,
+            reporterEnglishName: userEnglishName,
             attendanceType: outlookType,
             date: outlookDate,
             startTime: startTime,
             endTime: endTime,
             reason: '직접입력',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            isOutlookRecord: true // Outlook 기록 표시
+            isOutlookRecord: true, // Outlook 기록 표시
+            noEmailRequired: true // 이메일 발송 불필요
         };
 
         // Firestore에 저장

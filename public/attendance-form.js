@@ -214,6 +214,10 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         : reasonSelect;
 
     // 폼 데이터 수집
+    if (!currentUserData) {
+        await loadCurrentUser();
+    }
+
     const attendanceData = {
         reporter: currentUser.email,
         reporterName: currentUserData?.name || currentUser.email,

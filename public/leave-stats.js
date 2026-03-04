@@ -242,11 +242,16 @@ async function addOutlookLeaveRecord() {
     }
 
     try {
+        // 사용자 영문 이름 조회
+        const userDoc = await usersCollection.doc(currentUser.email).get();
+        const userEnglishName = userDoc.exists ? (userDoc.data().englishName || currentUser.email) : currentUser.email;
+        const userName = userDoc.exists ? (userDoc.data().name || currentUser.email) : currentUser.email;
+
         // Outlook 휴가 기록 생성 (종료일, 시작시간, 종료시간은 입력하지 않음)
         const outlookData = {
             reporter: currentUser.email,
-            reporterName: currentUser.email,
-            reporterEnglishName: currentUser.email,
+            reporterName: userName,
+            reporterEnglishName: userEnglishName,
             leaveType: leaveType,
             leaveDays: leaveDays.toString(),
             startDate: leaveStartDate,

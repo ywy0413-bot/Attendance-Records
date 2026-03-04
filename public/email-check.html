@@ -199,6 +199,10 @@
                 const attendanceRecords = [];
                 attendanceSnapshot.forEach(doc => {
                     const data = doc.data();
+                    // 휴가차감, Outlook 직접입력 등 이메일 불필요 기록 제외
+                    if (data.noEmailRequired || data.isDeduction || data.isOutlookRecord) {
+                        return;
+                    }
                     attendanceRecords.push({
                         id: doc.id,
                         type: '근태신고',
@@ -347,6 +351,17 @@
 
                 const data = doc.data();
 
+                // users 컬렉션에서 최신 이름 조회 (저장된 값이 이메일 주소일 경우 보정)
+                let reporterEnglishName = data.reporterEnglishName;
+                let reporterName = data.reporterName;
+                if (data.reporter) {
+                    const userDoc = await usersCollection.doc(data.reporter).get();
+                    if (userDoc.exists) {
+                        reporterEnglishName = userDoc.data().englishName || reporterEnglishName;
+                        reporterName = userDoc.data().name || reporterName;
+                    }
+                }
+
                 // API 엔드포인트 결정
                 const apiUrl = type === '휴가신고'
                     ? 'https://attendance-records.onrender.com/api/leave'
@@ -357,8 +372,8 @@
                 if (type === '휴가신고') {
                     requestBody = {
                         reporter: data.reporter,
-                        reporterName: data.reporterName,
-                        reporterEnglishName: data.reporterEnglishName,
+                        reporterName: reporterName,
+                        reporterEnglishName: reporterEnglishName,
                         leaveType: data.leaveType,
                         leaveDays: data.leaveDays,
                         startDate: data.startDate,
@@ -371,8 +386,8 @@
                 } else {
                     requestBody = {
                         reporter: data.reporter,
-                        reporterName: data.reporterName,
-                        reporterEnglishName: data.reporterEnglishName,
+                        reporterName: reporterName,
+                        reporterEnglishName: reporterEnglishName,
                         attendanceType: data.attendanceType,
                         date: data.date,
                         startTime: data.startTime,
