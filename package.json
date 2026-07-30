@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "deploy:hosting": "firebase deploy --only hosting --project attendance-records-375b6"
   },
   "keywords": [
     "attendance",

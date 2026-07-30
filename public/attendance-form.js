@@ -321,7 +321,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-            const emailResponse = await fetch('https://attendance-records.onrender.com/api/attendance', {
+            const emailResponse = await fetch('https://asia-northeast3-attendance-records-375b6.cloudfunctions.net/sendAttendanceEmail', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

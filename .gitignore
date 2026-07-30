@@ -25,3 +25,6 @@ build/
 # Windows 예약된 파일명
 nul
 .firebase/
+
+# OneDrive 동기화 충돌 사본
+*-DESKTOP-*
