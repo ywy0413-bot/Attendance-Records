@@ -358,8 +358,14 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
             emailError: emailError
         });
 
-        // 성공 팝업 표시
-        alert('메일이 성공적으로 발송되었습니다.');
+        // 결과 팝업 표시 (신고는 저장됐어도 메일이 실패할 수 있으므로 구분해서 안내)
+        if (emailSent) {
+            alert('메일이 성공적으로 발송되었습니다.');
+        } else {
+            alert('신고 내용은 저장되었으나 메일 발송에 실패했습니다.\n\n'
+                + '사유: ' + (emailError || '알 수 없음') + '\n\n'
+                + '인사팀에 알려주시면 재발송 처리됩니다.');
+        }
 
         // 폼 초기화
         document.getElementById('attendanceForm').reset();
