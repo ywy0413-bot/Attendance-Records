@@ -1,4 +1,6 @@
-const functions = require('firebase-functions');
+// 1세대(v1) API를 명시적으로 가져온다. firebase-functions v5부터 루트 진입점이
+// 2세대(v2) API로 바뀌었으므로, /v1 서브패스를 써야 functions.region()이 유지된다.
+const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const sgMail = require('@sendgrid/mail');
 const ALLOWED_ORIGINS = [
@@ -50,7 +52,13 @@ async function resolveReporterName(reporter, reporterEnglishName, reporterName) 
 exports.sendLeaveEmail = functions
     .region('asia-northeast3')
     .https.onRequest((req, res) => {
-        cors(req, res, async () => {
+        cors(req, res, async (corsError) => {
+            // cors 미들웨어는 허용되지 않은 출처일 때 next(err)로 에러를 넘긴다.
+            // 이를 받지 않으면 CORS 헤더 없이 본문이 그대로 실행돼 메일이 발송된다.
+            if (corsError) {
+                console.warn('✗ 허용되지 않은 출처 차단:', req.headers.origin);
+                return res.status(403).json({ success: false, message: '허용되지 않은 출처입니다.' });
+            }
             if (req.method !== 'POST') {
                 return res.status(405).json({ error: 'Method not allowed' });
             }
@@ -151,7 +159,13 @@ exports.sendLeaveEmail = functions
 exports.sendAttendanceEmail = functions
     .region('asia-northeast3')
     .https.onRequest((req, res) => {
-        cors(req, res, async () => {
+        cors(req, res, async (corsError) => {
+            // cors 미들웨어는 허용되지 않은 출처일 때 next(err)로 에러를 넘긴다.
+            // 이를 받지 않으면 CORS 헤더 없이 본문이 그대로 실행돼 메일이 발송된다.
+            if (corsError) {
+                console.warn('✗ 허용되지 않은 출처 차단:', req.headers.origin);
+                return res.status(403).json({ success: false, message: '허용되지 않은 출처입니다.' });
+            }
             if (req.method !== 'POST') {
                 return res.status(405).json({ error: 'Method not allowed' });
             }
@@ -308,7 +322,13 @@ function cancelEmailBody(rows) {
 exports.cancelAttendanceEmail = functions
     .region('asia-northeast3')
     .https.onRequest((req, res) => {
-        cors(req, res, async () => {
+        cors(req, res, async (corsError) => {
+            // cors 미들웨어는 허용되지 않은 출처일 때 next(err)로 에러를 넘긴다.
+            // 이를 받지 않으면 CORS 헤더 없이 본문이 그대로 실행돼 메일이 발송된다.
+            if (corsError) {
+                console.warn('✗ 허용되지 않은 출처 차단:', req.headers.origin);
+                return res.status(403).json({ success: false, message: '허용되지 않은 출처입니다.' });
+            }
             if (req.method !== 'POST') {
                 return res.status(405).json({ error: 'Method not allowed' });
             }
@@ -378,7 +398,13 @@ exports.cancelAttendanceEmail = functions
 exports.cancelLeaveEmail = functions
     .region('asia-northeast3')
     .https.onRequest((req, res) => {
-        cors(req, res, async () => {
+        cors(req, res, async (corsError) => {
+            // cors 미들웨어는 허용되지 않은 출처일 때 next(err)로 에러를 넘긴다.
+            // 이를 받지 않으면 CORS 헤더 없이 본문이 그대로 실행돼 메일이 발송된다.
+            if (corsError) {
+                console.warn('✗ 허용되지 않은 출처 차단:', req.headers.origin);
+                return res.status(403).json({ success: false, message: '허용되지 않은 출처입니다.' });
+            }
             if (req.method !== 'POST') {
                 return res.status(405).json({ error: 'Method not allowed' });
             }
