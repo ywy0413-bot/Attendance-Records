@@ -1,0 +1,27 @@
+version: 2
+
+# 의존성이 몇 달씩 방치되어 정작 배포가 필요한 날 막히는 일을 막는 목적.
+# 특히 firebase-functions는 메이저 버전에서 진입점이 바뀐 적이 있어(v5부터 루트가
+# 2세대 API) 조용히 뒤처지면 업그레이드 비용이 커진다. 월 1회 PR로 미리 알린다.
+updates:
+  # Cloud Functions (메일 발송·취소 함수)
+  - package-ecosystem: "npm"
+    directory: "/functions"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(functions)"
+    labels:
+      - "dependencies"
+
+  # Render 이메일 서버 (server.js) — Cloud Functions 장애 시 대체 경로로 살려두고 있다
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(server)"
+    labels:
+      - "dependencies"
